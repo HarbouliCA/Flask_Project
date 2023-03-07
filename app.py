@@ -16,6 +16,8 @@ from flask_security import UserMixin, RoleMixin
 from datetime import datetime
 from flask_security import UserMixin
 import os
+from flask_bcrypt import Bcrypt
+
 
 app = Flask(__name__)
 
@@ -24,17 +26,26 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secretkey'
-db = SQLAlchemy(app)
 
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+
+login_manager = LoginManager(app)
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+def active():
+    return True
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(20), nullable = False, unique = True)
     password = db.Column(db.String(80), nullable = False, unique = True)
-
-#with app.app_context():
-#    db.create_all()
-#    print('created')
+    active = active()
 
 
 class RegisterFrom(FlaskForm):
@@ -75,15 +86,39 @@ def home():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     form = LoginFrom()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username = form.username.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user)
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Login unsuccedfull. please check username and password')
     return render_template('login.html', form = form)
+
+
+
+@app.route('/dashboard', methods = ['GET', 'POST'])
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
 
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
     form = RegisterFrom()
+
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
+        new_user = User(username = form.username.data, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
     return render_template('register.html', form = form)
 
 
+#with app.app_context():
+#    db.create_all()
+#    print('created')
 
 
 if __name__ == '__main__':
