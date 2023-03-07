@@ -1,3 +1,4 @@
+from flask import current_app
 from wtforms import StringField, SubmitField, BooleanField
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask import Flask, render_template, redirect, url_for
@@ -32,20 +33,22 @@ bcrypt = Bcrypt(app)
 
 login_manager = LoginManager(app)
 login_manager.init_app(app)
-login_manager.login_view = "login"
+login_manager.login_view = 'login'
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-def active():
-    return True
+def load_user(id):
+    with current_app.app_context():
+        return User.query.get(id)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(20), nullable = False, unique = True)
-    password = db.Column(db.String(80), nullable = False, unique = True)
-    active = active()
+    password = db.Column(db.String(80), nullable = False)
+    active= db.Column(db.Boolean, default=True, nullable=False)
+    fs_uniquifier = db.Column(db.String(64), unique=True)
+
+    def get_id(self):
+        return self.id 
 
 
 class RegisterFrom(FlaskForm):
@@ -58,12 +61,13 @@ class RegisterFrom(FlaskForm):
     submit = SubmitField("Register")
 
 
-def validate_username(self, username):
-    existing_user_name = User.query.filter_by(
-        username = username.data).first()
-    
-    if existing_user_name:
-        raise ValidationError('That username already exists. Please choose a different one.')
+    def validate_username(self, username):
+        existing_user_name = User.query.filter_by(
+            username = username.data).first()
+        
+        if existing_user_name:
+            raise ValidationError(
+                'That username already exists. Please choose a different one.')
 
 
 class LoginFrom(FlaskForm):
@@ -73,34 +77,49 @@ class LoginFrom(FlaskForm):
     password = PasswordField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder": "Password"})
     
+    remember = BooleanField('Remember Me')
+                            
     submit = SubmitField("Login")
-
-
 
 
 @app.route('/')
 def home():
-    
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    else:
+        return render_template('index.html')
+
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
     form = LoginFrom()
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user)
-            return redirect(url_for('dashboard'))
+            login_user(user, remember= form.remember.data)
+            user.authenticated = True
+            db.session.commit()
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('dashboard'))
         else:
-            flash('Login unsuccedfull. please check username and password')
-    return render_template('login.html', form = form)
+            flash('Login Unsuccessful. Please check email and password', 'danger')
+    return render_template('login.html', title='Login', form=form)
 
 
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
-@app.route('/dashboard', methods = ['GET', 'POST'])
-@login_required
-def dashboard():
-    return render_template('dashboard.html')
 
 
 @app.route('/register', methods = ['GET', 'POST'])
@@ -108,12 +127,14 @@ def register():
     form = RegisterFrom()
 
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data)
-        new_user = User(username = form.username.data, password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        new_user = User(username=form.username.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
+        flash('Your account has been created', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html', form = form)
+    else:
+        return render_template('register.html', form = form)
 
 
 #with app.app_context():
