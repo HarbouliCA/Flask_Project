@@ -1,0 +1,106 @@
+{% extends "index.html" %}
+{% block content %}
+
+  <h1>Add Child</h1>
+  
+  <form method="POST" action="{{ url_for('add_child') }}">
+    {{ form.csrf_token }}
+    <div class="form-group">
+      {{ form.name.label }}
+      {{ form.name }}
+    </div>
+
+    <div class="form-group">
+      {{ form.contact.label }}
+      {{ form.contact }}
+    </div>
+
+    <div class="form-group">
+      {{ form.sex.label }}
+      {{ form.sex }}
+    </div>
+
+    <div class="form-group">
+      {{ form.birthdate.label }}
+      {{ form.birthdate }}
+    </div>
+
+    <div class="form-group">
+      {{ form.age.label }}
+      {{ form.age }}
+    </div>
+
+    <div class="form-group">
+      {{ form.quartier.label }}
+      {{ form.quartier }}
+    </div>
+
+    <div class="form-group">
+      {{ form.adresse.label }}
+      {{ form.adresse }}
+    </div>
+
+    <div class="form-group">
+      {{ form.situation_familliale.label }}
+      {{ form.situation_familliale }}
+    </div>
+
+    <div class="form-group">
+      {{ form.fonction_pere.label }}
+      {{ form.fonction_pere }}
+    </div>
+
+    <div class="form-group">
+      {{ form.fonction_mere.label }}
+      {{ form.fonction_mere }}
+    </div>
+
+    <div class="form-group">
+      {{ form.fraterie.label }}
+      {{ form.fraterie }}
+    </div>
+
+    <div class="form-group">
+      {{ form.problemes_sante.label }}
+      {{ form.problemes_sante }}
+    </div>
+
+    <div class="form-group">
+      {{ form.niveau_scolaire.label }}
+      {{ form.niveau_scolaire }}
+    </div>
+
+    <div class="form-group">
+      {{ form.date_arret_etudes.label }}
+      {{ form.date_arret_etudes }}
+    </div>
+
+    <div class="form-group">
+      {{ form.experience_professionnelle.label }}
+      {{ form.experience_professionnelle }}
+    </div>
+
+    <div class="form-group">
+      {{ form.demande.label }}
+      {{ form.demande }}
+    </div>
+
+    <div class="form-group">
+      {{ form.insertion_scolaire.label }}
+      {{ form.insertion_scolaire }}
+    </div>
+
+    <div class="form-group">
+      {{ form.insertion_salariale.label }}
+      {{ form.insertion_salariale }}
+    </div>
+
+    <div class="form-group">
+      {{ form.Auto_emploi.label }}
+      {{ form.Auto_emploi }}
+    </div>
+
+    {{ form.submit(class_="btn btn-primary") }}
+  </form>
+
+{% endblock %}
