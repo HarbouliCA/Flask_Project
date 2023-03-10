@@ -7,7 +7,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField,PasswordField
-from wtforms.validators import DataRequired, InputRequired, Length, ValidationError
+from wtforms.validators import DataRequired, InputRequired, Length, ValidationError, NumberRange 
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from email_validator import validate_email, EmailNotValidError
@@ -22,6 +22,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, SelectField
 from wtforms.validators import DataRequired
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -77,6 +78,7 @@ class Children(db.Model, UserMixin):
     Insertion_scolaire = db.Column(db.Boolean, default=False, nullable=True)
     Insertion_salariale = db.Column(db.Boolean, default=False, nullable=True)
     Auto_emploi = db.Column(db.Boolean, default=False, nullable=True)
+    Entry_date = db.Column(db.Date, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     
 
@@ -89,7 +91,7 @@ class AddChildForm(FlaskForm):
     contact = StringField('Contact', validators=[DataRequired()])
     sex = SelectField('Gender', choices=[('male', 'Male'), ('female', 'Female')], validators=[DataRequired()])
     birthdate = DateField('Birthdate', validators=[DataRequired()])
-    age = IntegerField('Age', validators=[DataRequired()])
+    age = IntegerField('Age', validators=[DataRequired(), NumberRange(min=0)])
     quartier = StringField('Quartier', validators=[DataRequired()])
     adresse = StringField('Address', validators=[DataRequired()])
     situation_familliale = StringField('Family situation', validators=[DataRequired()])
@@ -104,7 +106,14 @@ class AddChildForm(FlaskForm):
     insertion_scolaire = BooleanField('School insertion')
     insertion_salariale = BooleanField('Work insertion')
     Auto_emploi = BooleanField('Self-employment')
+    Entry_date = DateField('Entry_date', validators=[DataRequired()])
     submit = SubmitField('Add Child')
+
+class PositiveIntegerField(IntegerField):
+    def pre_validate(self, form):
+        if self.data is not None and self.data < 0:
+            raise ValidationError('Age must be a positive integer')
+        
 @app.route('/add_child', methods=['GET', 'POST'])
 @login_required
 def add_child():
@@ -128,7 +137,8 @@ def add_child():
                       Demande=form.demande.data,
                       Insertion_scolaire=form.insertion_scolaire.data,
                       Insertion_salariale=form.insertion_salariale.data,
-                      Auto_emploi=form.Auto_emploi.data)
+                      Auto_emploi=form.Auto_emploi.data,
+                      Entry_date=form.Entry_date.data)
         db.session.add(current_user)
         db.session.merge(current_user)
         current_user.childs.append(child)
@@ -145,8 +155,31 @@ def add_child():
 @login_required
 def view_children():
     search_query = request.args.get('q', '')
-    children = Children.query.filter(Children.parent_id == current_user.id, Children.name.ilike(f'%{search_query}%')).all()
-    return render_template('view_children.html', children=children, search_query=search_query)
+    birthdate_query = request.args.get('birthdate', '')
+    entry_from_query = request.args.get('entry_from', '')
+    entry_to_query = request.args.get('entry_to', '')
+    
+    children_query = Children.query.filter(Children.parent_id == current_user.id)
+    
+    if search_query:
+        children_query = children_query.filter(Children.name.ilike(f'%{search_query}%'))
+    
+    if birthdate_query:
+        birthdate = datetime.strptime(birthdate_query, '%Y-%m-%d').date()
+        children_query = children_query.filter(Children.Date_naissance == birthdate)
+
+
+    if entry_from_query and entry_to_query:
+        entry_from_date = datetime.strptime(entry_from_query, '%Y-%m-%d').date()
+        entry_to_date = datetime.strptime(entry_to_query, '%Y-%m-%d').date()
+        children_query = children_query.filter(Children.Entry_date.between(entry_from_date, entry_to_date))
+
+    
+    children = children_query.all()
+    print(children)  # add this line to print the children data
+    return render_template('view_children.html', children=children, search_query=search_query, birthdate_query=birthdate_query, entry_from_query=entry_from_query, entry_to_query=entry_to_query)
+
+
 
 
 
