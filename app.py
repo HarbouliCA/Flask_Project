@@ -70,7 +70,7 @@ class Children(db.Model, UserMixin):
     Auto_emploi = db.Column(db.Boolean, default=False, nullable=True)
     Entry_date = db.Column(db.Date, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    parent = db.relationship('User', backref=db.backref('children', lazy=True))
+
 
 user_roles = db.Table('user_roles',
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
@@ -85,6 +85,8 @@ class User(db.Model, UserMixin):
     childs = db.relationship('Children', backref='author', lazy=True)
     roles = db.relationship('Role', secondary= user_roles, lazy='joined',
                              backref=db.backref('users', lazy=True))
+
+
 
     def get_id(self):
         return self.id 
@@ -208,10 +210,10 @@ class AddChildForm(FlaskForm):
     Entry_date = DateField('Entry_date', validators=[DataRequired()])
     submit = SubmitField('Add Child')
 
-class PositiveIntegerField(IntegerField):
-    def pre_validate(self, form):
-        if self.data is not None and self.data < 0:
-            raise ValidationError('Age must be a positive integer')
+#class PositiveIntegerField(IntegerField):
+#    def pre_validate(self, form):
+#        if self.data is not None and self.data < 0:
+#            raise ValidationError('Age must be a positive integer')
         
 @app.route('/add_child', methods=['GET', 'POST'])
 @manager_role_required
@@ -291,7 +293,7 @@ def edit_child(id):
     if child is None:
         flash('Child not found.', 'danger')
         return redirect(url_for('view_children'))
-
+    
     form = AddChildForm(obj=child)
 
     if form.validate_on_submit():
@@ -299,7 +301,29 @@ def edit_child(id):
         db.session.commit()
         flash('Child updated successfully.', 'success')
         return redirect(url_for('view_children'))
-
+    else:
+        # populate form fields with current child data
+        form.name.data = child.name
+        form.contact.data = child.contact
+        form.sex.data = child.sex
+        form.birthdate.data = child.Date_naissance
+        form.age.data = child.age
+        form.quartier.data = child.Quartier
+        form.adresse.data = child.Adresse
+        form.situation_familliale.data = child.situation_familliale
+        form.fonction_pere.data = child.Fonction_pere
+        form.fonction_mere.data = child.Fonction_mere
+        form.fraterie.data = child.Fraterie
+        form.problemes_sante.data = child.Problemes_sante
+        form.niveau_scolaire.data = child.Niveau_scolaire
+        form.date_arret_etudes.data = child.date_arret_etudes
+        form.experience_professionnelle.data = child.Experience_professionnelle
+        form.demande.data = child.Demande
+        form.insertion_scolaire.data = child.Insertion_scolaire
+        form.insertion_salariale.data = child.Insertion_salariale
+        form.Auto_emploi.data = child.Auto_emploi
+        form.Entry_date.data = child.Entry_date
+        
     return render_template('edit_child.html', form=form, child=child)
 
 
