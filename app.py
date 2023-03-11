@@ -1,10 +1,6 @@
 from flask import current_app
 from wtforms import StringField, SubmitField, BooleanField
 from flask import Flask, render_template, request, redirect, url_for, flash
-<<<<<<< HEAD
-=======
-from flask import Flask, render_template, redirect, url_for
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin
@@ -16,10 +12,6 @@ from flask_admin.contrib.sqla import ModelView
 from email_validator import validate_email, EmailNotValidError
 from flask_wtf.csrf import CSRFProtect
 import uuid
-<<<<<<< HEAD
-=======
-from flask_security import UserMixin, RoleMixin
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 from datetime import datetime
 from flask_security import UserMixin
 import os
@@ -48,27 +40,11 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(id):
-<<<<<<< HEAD
     with app.app_context():
         # add your code that needs the application context here
         # for example, you can add the admin role like this:      
         return User.query.get(int(id))
 
-=======
-    with current_app.app_context():
-        return User.query.get(id)
-
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(20), nullable = False, unique = True)
-    password = db.Column(db.String(80), nullable = False)
-    active= db.Column(db.Boolean, default=True, nullable=False)
-    fs_uniquifier = db.Column(db.String(64), unique=True)
-    childs = db.relationship('Children', backref='author', lazy=True)
-
-    def get_id(self):
-        return self.id 
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 
 
 class Children(db.Model, UserMixin):
@@ -94,7 +70,6 @@ class Children(db.Model, UserMixin):
     Auto_emploi = db.Column(db.Boolean, default=False, nullable=True)
     Entry_date = db.Column(db.Date, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-<<<<<<< HEAD
     parent = db.relationship('User', backref=db.backref('children', lazy=True))
 
 user_roles = db.Table('user_roles',
@@ -206,10 +181,6 @@ def basic_role_required(func):
 
 #comment
 
-=======
-    
-
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 #with app.app_context():
 #    db.create_all()
 #    print('created')
@@ -243,10 +214,7 @@ class PositiveIntegerField(IntegerField):
             raise ValidationError('Age must be a positive integer')
         
 @app.route('/add_child', methods=['GET', 'POST'])
-<<<<<<< HEAD
 @manager_role_required
-=======
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 @login_required
 def add_child():
     form = AddChildForm()
@@ -271,7 +239,6 @@ def add_child():
                       Insertion_salariale=form.insertion_salariale.data,
                       Auto_emploi=form.Auto_emploi.data,
                       Entry_date=form.Entry_date.data)
-<<<<<<< HEAD
 
         user = User.query.get(current_user.id)
         user.childs.append(child)
@@ -280,23 +247,10 @@ def add_child():
         flash('Child added successfully', 'success')
         return redirect(url_for('view_children'))
 
-=======
-        db.session.add(current_user)
-        db.session.merge(current_user)
-        current_user.childs.append(child)
-        db.session.commit()
-        flash('Child added successfully', 'success')
-        return redirect(url_for('view_children'))
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
     return render_template('add_child.html', form=form)
 
 
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 @app.route('/view_children')
 @login_required
 def view_children():
@@ -305,11 +259,7 @@ def view_children():
     entry_from_query = request.args.get('entry_from', '')
     entry_to_query = request.args.get('entry_to', '')
     
-<<<<<<< HEAD
     children_query = Children.query
-=======
-    children_query = Children.query.filter(Children.parent_id == current_user.id)
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
     
     if search_query:
         children_query = children_query.filter(Children.name.ilike(f'%{search_query}%'))
@@ -326,11 +276,7 @@ def view_children():
 
     
     children = children_query.all()
-<<<<<<< HEAD
     
-=======
-    print(children)  # add this line to print the children data
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
     return render_template('view_children.html', children=children, search_query=search_query, birthdate_query=birthdate_query, entry_from_query=entry_from_query, entry_to_query=entry_to_query)
 
 
@@ -338,10 +284,7 @@ def view_children():
 
 
 @app.route('/edit_child/<int:id>', methods=['GET', 'POST'])
-<<<<<<< HEAD
 @manager_role_required
-=======
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 @login_required
 def edit_child(id):
     child = Children.query.get(id)
@@ -361,10 +304,7 @@ def edit_child(id):
 
 
 @app.route('/delete_child/<int:id>', methods=['POST'])
-<<<<<<< HEAD
 @manager_role_required
-=======
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 @login_required
 def delete_child(id):
     child = Children.query.get(id)
@@ -422,12 +362,8 @@ def home():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-<<<<<<< HEAD
     username = current_user.username
     return render_template('dashboard.html', user=username)
-=======
-    return render_template('dashboard.html')
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -457,10 +393,7 @@ def logout():
 
 
 @app.route('/register', methods = ['GET', 'POST'])
-<<<<<<< HEAD
 @admin_role_required
-=======
->>>>>>> 64a048947061f5592351f3de926614a733e27f0f
 def register():
     form = RegisterFrom()
 
