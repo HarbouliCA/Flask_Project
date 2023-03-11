@@ -10,14 +10,12 @@
     <h2>{{ user }}. You are logged in. Dashboard page.</h2>
 
     <ul>
-        {% if 'admin' in [r.name if r in current_user.roles if r] %}
-
-        <li><a href="{{ url_for('register') }}">Register</a></li>
-        {% endif %}
-
-        <li><a href="{{url_for('logout')}}">Logout</a></li>
         <li><a href="{{url_for('view_children')}}">View Children</a></li>
         <li><a href="{{url_for('add_child')}}">Add Child</a></li>
+        {% if current_user.roles|selectattr('name', 'equalto', 'admin')|list %}
+        <li><a href="{{ url_for('register') }}">Register</a></li>
+        {% endif %}
+        <li><a href="{{url_for('logout')}}">Logout</a></li>
     </ul>
 </body>
 </html>
