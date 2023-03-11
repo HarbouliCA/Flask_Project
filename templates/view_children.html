@@ -4,6 +4,7 @@
   <title>View Children</title>
 </head>
 <body>
+<<<<<<< HEAD
 
   <h1>Children List</h1>
   <ul>
@@ -13,6 +14,9 @@
     
   </ul>
    
+=======
+  <h1>Children List</h1> <a href="{{ url_for('dashboard') }}">Back</a> <br> <a href="{{ url_for('view_children') }}" class="btn btn-default">Refresh</a>
+>>>>>>> 64a048947061f5592351f3de926614a733e27f0f
   <h3> Search by Name : <form method="GET" action="{{ url_for('view_children') }}">
     <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name...">
   <button type="submit">Search</button></h3>
