@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Delete Child</h2>
+    <p>Are you sure you want to delete this child?</p>
+    <form method="POST" action="{{ url_for('delete_child', id=child.id) }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{{ url_for('view_children') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

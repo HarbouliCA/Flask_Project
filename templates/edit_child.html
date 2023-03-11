@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Child</title>
+</head>
+<body>
+  <h1>Edit Child</h1>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+      <label for="name">Name</label>
+      {{ form.name }}
+    </div>
+    <div>
+      <label for="contact">Contact</label>
+      {{ form.contact }}
+    </div>
+    <div>
+      <label for="sex">Sex</label>
+      {{ form.sex }}
+    </div>
+    <div>
+      <label for="birthdate">Birthdate</label>
+      {{ form.birthdate }}
+    </div>
+    <div>
+      <label for="age">Age</label>
+      {{ form.age }}
+    </div>
+    <div>
+      <label for="quartier">Quartier</label>
+      {{ form.quartier }}
+    </div>
+    <div>
+      <label for="adresse">Adresse</label>
+      {{ form.adresse }}
+    </div>
+    <div>
+      <label for="situation_familliale">Family situation</label>
+      {{ form.situation_familliale }}
+    </div>
+    <div>
+      <label for="fonction_pere">Father's profession</label>
+      {{ form.fonction_pere }}
+    </div>
+    <div>
+      <label for="fonction_mere">Mother's profession</label>
+      {{ form.fonction_mere }}
+    </div>
+    <div>
+      <label for="fraterie">Number of siblings</label>
+      {{ form.fraterie }}
+    </div>
+    <div>
+      <label for="problemes_sante">Health problems</label>
+      {{ form.problemes_sante }}
+    </div>
+    <div>
+      <label for="niveau_scolaire">Education level</label>
+      {{ form.niveau_scolaire }}
+    </div>
+    <div>
+      <label for="date_arret_etudes">Date stopped studying</label>
+      {{ form.date_arret_etudes }}
+    </div>
+    <div>
+      <label for="experience_professionnelle">Work experience</label>
+      {{ form.experience_professionnelle }}
+    </div>
+    <div>
+      <label for="demande">Job request</label>
+      {{ form.demande }}
+    </div>
+    <div>
+      <label for="insertion_scolaire">School insertion</label>
+      {{ form.insertion_scolaire }}
+    </div>
+    <div>
+      <label for="insertion_salariale">Work insertion</label>
+      {{ form.insertion_salariale }}
+    </div>
+    <div>
+      <label for="Auto_emploi">Self-employment</label>
+      {{ form.Auto_emploi }}
+    </div>
+
+    <div>
+      <label for="Entry_date">Entry date</label>
+      {{ form.Entry_date }}
+    </div>
+
+    <br>
+    <button type="submit">Update Child</button>
+    <br>
+    
+    <a href="{{ url_for('view_children') }}">Back</a>
+  </form>
+</body>
+</html>
