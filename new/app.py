@@ -76,14 +76,6 @@ user_roles = db.Table('user_roles',
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
-
-from flask_bcrypt import generate_password_hash
-
-def hash_password(password):
-    hashed_password = generate_password_hash(password).decode('utf-8')
-    return hashed_password
-
-
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(20), nullable = False, unique = True)
@@ -94,14 +86,11 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary= user_roles, lazy='joined',
                              backref=db.backref('users', lazy=True))
 
+
+
     def get_id(self):
         return self.id 
     
-    def set_password(self, password):
-        self.password = hash_password(password)
-
-    def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -443,39 +432,7 @@ def register():
         return render_template('register.html', form = form)
 
 
-class EditUserForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Save Changes')
 
-@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
-def edit_user(user_id):
-    user = User.query.get(user_id)
-    form = EditUserForm(obj=user)
-    if form.validate_on_submit():
-        form.populate_obj(user)
-        user.set_password(form.password.data)
-        db.session.commit()
-        flash('User updated successfully.')
-        return redirect('/user_management')
-    return render_template('edit_user.html', form=form)
-
-@app.template_filter('hide_password')
-def hide_password(password):
-    return '*' * len(password)
-
-@app.route('/delete_user/<int:user_id>')
-def delete_user(user_id):
-    user = User.query.get(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash('User deleted successfully.')
-    return redirect('/user_management')
-
-@app.route('/user_management')
-def user_management():
-    users = User.query.all()
-    return render_template('user_management.html', users=users)
 
 
 if __name__ == '__main__':

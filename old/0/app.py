@@ -1,6 +1,7 @@
 from flask import current_app
 from wtforms import StringField, SubmitField, BooleanField
 from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin
@@ -21,6 +22,8 @@ from wtforms import StringField, DateField, SelectField
 from wtforms.validators import DataRequired
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
 from datetime import datetime
+from flask_principal import Principal, Permission, RoleNeed
+from flask_principal import identity_loaded, UserNeed
 
 app = Flask(__name__)
 
@@ -31,6 +34,8 @@ database_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'databa
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secretkey'
 
+
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
@@ -38,12 +43,9 @@ login_manager = LoginManager(app)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-@login_manager.user_loader
-def load_user(id):
-    with app.app_context():
-        # add your code that needs the application context here
-        # for example, you can add the admin role like this:      
-        return User.query.get(int(id))
+# Define roles and permissions
+admin_permission = Permission(RoleNeed('admin'))
+user_permission = Permission(RoleNeed('user'))
 
 
 
@@ -72,18 +74,6 @@ class Children(db.Model, UserMixin):
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
-user_roles = db.Table('user_roles',
-    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
-
-
-from flask_bcrypt import generate_password_hash
-
-def hash_password(password):
-    hashed_password = generate_password_hash(password).decode('utf-8')
-    return hashed_password
-
-
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(20), nullable = False, unique = True)
@@ -91,108 +81,48 @@ class User(db.Model, UserMixin):
     active= db.Column(db.Boolean, default=True, nullable=False)
     fs_uniquifier = db.Column(db.String(64), unique=True)
     childs = db.relationship('Children', backref='author', lazy=True)
-    roles = db.relationship('Role', secondary= user_roles, lazy='joined',
-                             backref=db.backref('users', lazy=True))
+    
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
 
     def get_id(self):
         return self.id 
     
-    def set_password(self, password):
-        self.password = hash_password(password)
 
-    def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
+class Role(db.Model):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.String(255)) 
+    users = db.relationship('User', backref='role', lazy=True)
 
-class Role(db.Model, RoleMixin):
+
+class UserRoles(db.Model):
+    __tablename__ = 'UserRoles'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id', ondelete='CASCADE'), nullable=False)
 
 
+@login_manager.user_loader
+def load_user(id):
+    with current_app.app_context():
+        return User.query.get(id)
 
-def create_roles():
-    with app.app_context():
-        admin_role = Role(name='admin')
-        # create some roles
-        admin_role = Role.query.filter_by(name='admin').first()
-        if not admin_role:
-            admin_role = Role(name='admin')
-            db.session.add(admin_role)
-
-        manager_role = Role.query.filter_by(name='manager').first()
-        if not manager_role:
-            manager_role = Role(name='manager')
-            db.session.add(manager_role)
-
-        basic_role = Role.query.filter_by(name='basic').first()
-        if not basic_role:
-            basic_role = Role(name='basic')
-            db.session.add(basic_role)
-
-        # create a default admin user
-        admin_user = User.query.filter_by(username='admin').first()
-        if not admin_user:
-            admin_user = User(username='admin', password=bcrypt.generate_password_hash('password').decode('utf-8'))
-            db.session.add(admin_user)
-
-        # add roles to admin user
-        if admin_role not in admin_user.roles:
-            admin_user.roles.append(admin_role)
-        if manager_role not in admin_user.roles:
-            admin_user.roles.append(manager_role)
-        db.session.commit()
+# Create the roles
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    if hasattr(current_user, 'role'):
+        if current_user.role == 'admin':
+            identity.provides.add(admin_permission)
+        else:
+            identity.provides.add(user_permission)
 
 
-# Register the function to run after the application context is pushed
-app.before_first_request(create_roles)
+# Initialize Flask-Principal
+principal = Principal(app)
 
-
-from functools import wraps
-from flask import abort
-
-def role_required(*roles):
-    def wrapper(fn):
-        @wraps(fn)
-        def decorated_view(*args, **kwargs):
-            if not current_user.has_roles(*roles):
-                abort(403)  # HTTP status code for "Forbidden"
-            return fn(*args, **kwargs)
-        return decorated_view
-    return wrapper
-
-# Define a decorator for the admin role
-def admin_role_required(func):
-    @wraps(func)
-    @login_required
-    def decorated_view(*args, **kwargs):
-        if 'admin' not in [r.name for r in current_user.roles]:
-            return app.login_manager.unauthorized()
-        return func(*args, **kwargs)
-    return decorated_view
-
-
-# Define a decorator for the manager role
-def manager_role_required(func):
-    @wraps(func)
-    @login_required
-    def decorated_view(*args, **kwargs):
-        if 'manager' not in [r.name for r in current_user.roles]:
-            return app.login_manager.unauthorized()
-        return func(*args, **kwargs)
-    return decorated_view
-
-
-# Define a decorator for the basic role
-def basic_role_required(func):
-    @wraps(func)
-    @login_required
-    def decorated_view(*args, **kwargs):
-        if 'basic' not in [r.name for r in current_user.roles]:
-            return app.login_manager.unauthorized()
-        return func(*args, **kwargs)
-    return decorated_view
-
-
-#comment
 
 #with app.app_context():
 #    db.create_all()
@@ -221,14 +151,14 @@ class AddChildForm(FlaskForm):
     Entry_date = DateField('Entry_date', validators=[DataRequired()])
     submit = SubmitField('Add Child')
 
-#class PositiveIntegerField(IntegerField):
-#    def pre_validate(self, form):
-#        if self.data is not None and self.data < 0:
-#            raise ValidationError('Age must be a positive integer')
+class PositiveIntegerField(IntegerField):
+    def pre_validate(self, form):
+        if self.data is not None and self.data < 0:
+            raise ValidationError('Age must be a positive integer')
         
 @app.route('/add_child', methods=['GET', 'POST'])
-@manager_role_required
 @login_required
+
 def add_child():
     form = AddChildForm()
     if form.validate_on_submit():
@@ -252,27 +182,28 @@ def add_child():
                       Insertion_salariale=form.insertion_salariale.data,
                       Auto_emploi=form.Auto_emploi.data,
                       Entry_date=form.Entry_date.data)
-
-        user = User.query.get(current_user.id)
-        user.childs.append(child)
+        db.session.add(current_user)
+        db.session.merge(current_user)
+        current_user.childs.append(child)
         db.session.commit()
-
         flash('Child added successfully', 'success')
         return redirect(url_for('view_children'))
-
     return render_template('add_child.html', form=form)
+
+
 
 
 
 @app.route('/view_children')
 @login_required
+
 def view_children():
     search_query = request.args.get('q', '')
     birthdate_query = request.args.get('birthdate', '')
     entry_from_query = request.args.get('entry_from', '')
     entry_to_query = request.args.get('entry_to', '')
     
-    children_query = Children.query
+    children_query = Children.query.filter(Children.parent_id == current_user.id)
     
     if search_query:
         children_query = children_query.filter(Children.name.ilike(f'%{search_query}%'))
@@ -297,14 +228,14 @@ def view_children():
 
 
 @app.route('/edit_child/<int:id>', methods=['GET', 'POST'])
-@manager_role_required
 @login_required
+
 def edit_child(id):
     child = Children.query.get(id)
     if child is None:
         flash('Child not found.', 'danger')
         return redirect(url_for('view_children'))
-    
+
     form = AddChildForm(obj=child)
 
     if form.validate_on_submit():
@@ -312,35 +243,13 @@ def edit_child(id):
         db.session.commit()
         flash('Child updated successfully.', 'success')
         return redirect(url_for('view_children'))
-    else:
-        # populate form fields with current child data
-        form.name.data = child.name
-        form.contact.data = child.contact
-        form.sex.data = child.sex
-        form.birthdate.data = child.Date_naissance
-        form.age.data = child.age
-        form.quartier.data = child.Quartier
-        form.adresse.data = child.Adresse
-        form.situation_familliale.data = child.situation_familliale
-        form.fonction_pere.data = child.Fonction_pere
-        form.fonction_mere.data = child.Fonction_mere
-        form.fraterie.data = child.Fraterie
-        form.problemes_sante.data = child.Problemes_sante
-        form.niveau_scolaire.data = child.Niveau_scolaire
-        form.date_arret_etudes.data = child.date_arret_etudes
-        form.experience_professionnelle.data = child.Experience_professionnelle
-        form.demande.data = child.Demande
-        form.insertion_scolaire.data = child.Insertion_scolaire
-        form.insertion_salariale.data = child.Insertion_salariale
-        form.Auto_emploi.data = child.Auto_emploi
-        form.Entry_date.data = child.Entry_date
-        
+
     return render_template('edit_child.html', form=form, child=child)
 
 
 @app.route('/delete_child/<int:id>', methods=['POST'])
-@manager_role_required
 @login_required
+
 def delete_child(id):
     child = Children.query.get(id)
     if child is None:
@@ -397,8 +306,7 @@ def home():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    username = current_user.username
-    return render_template('dashboard.html', user=username)
+    return render_template('dashboard.html')
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -428,7 +336,6 @@ def logout():
 
 
 @app.route('/register', methods = ['GET', 'POST'])
-@admin_role_required
 def register():
     form = RegisterFrom()
 
@@ -443,39 +350,7 @@ def register():
         return render_template('register.html', form = form)
 
 
-class EditUserForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Save Changes')
 
-@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
-def edit_user(user_id):
-    user = User.query.get(user_id)
-    form = EditUserForm(obj=user)
-    if form.validate_on_submit():
-        form.populate_obj(user)
-        user.set_password(form.password.data)
-        db.session.commit()
-        flash('User updated successfully.')
-        return redirect('/user_management')
-    return render_template('edit_user.html', form=form)
-
-@app.template_filter('hide_password')
-def hide_password(password):
-    return '*' * len(password)
-
-@app.route('/delete_user/<int:user_id>')
-def delete_user(user_id):
-    user = User.query.get(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash('User deleted successfully.')
-    return redirect('/user_management')
-
-@app.route('/user_management')
-def user_management():
-    users = User.query.all()
-    return render_template('user_management.html', users=users)
 
 
 if __name__ == '__main__':

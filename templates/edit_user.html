@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit User</title>
+</head>
+<body>
+    <h1>Edit User</h1>
+    <form method="post" action="">
+        {{ form.csrf_token }}
+        <div>
+            {{ form.username.label }} {{ form.username() }}
+        </div>
+        <div>
+            {{ form.password.label }} {{ form.password() }}
+        </div>
+        <button type="submit">Save Changes</button>
+    </form>
+    <ul>
+        <li><a href="{{ url_for('view_children') }}">Back</a></li>
+      </ul>
+</body>
+</html>

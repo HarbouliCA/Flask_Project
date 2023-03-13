@@ -14,7 +14,6 @@
         <li><a href="{{url_for('add_child')}}">Add Child</a></li>
         {% if current_user.roles|selectattr('name', 'equalto', 'admin')|list %}
         <li><a href="{{ url_for('register') }}">Add a user</a></li>
-        <li><a href="{{ url_for('user_management') }}">user management</a></li>
         {% endif %}
         <li><a href="{{url_for('logout')}}">Logout</a></li>
     </ul>

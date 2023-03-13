@@ -4,15 +4,7 @@
   <title>View Children</title>
 </head>
 <body>
-
-  <h1>Children List</h1>
-  <ul>
-    <li><a href="{{ url_for('view_children') }}" class="btn btn-default">Refresh</a></li>
-    <li><a href="{{url_for('add_child')}}">Add Child</a></li>
-    <li><a href="{{ url_for('dashboard') }}">Back</a></li>
-    
-  </ul>
-   
+  <h1>Children List</h1> <a href="{{ url_for('dashboard') }}">Back</a> <br> <a href="{{ url_for('view_children') }}" class="btn btn-default">Refresh</a>
   <h3> Search by Name : <form method="GET" action="{{ url_for('view_children') }}">
     <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name...">
   <button type="submit">Search</button></h3>

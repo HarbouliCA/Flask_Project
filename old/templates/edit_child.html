@@ -5,9 +5,6 @@
 </head>
 <body>
   <h1>Edit Child</h1>
-  <ul>
-    <li><a href="{{ url_for('view_children') }}">Back</a></li>
-  </ul>
   <form method="POST">
     {{ form.hidden_tag() }}
     <div>
@@ -86,12 +83,17 @@
       <label for="Auto_emploi">Self-employment</label>
       {{ form.Auto_emploi }}
     </div>
+
     <div>
       <label for="Entry_date">Entry date</label>
       {{ form.Entry_date }}
     </div>
+
     <br>
     <button type="submit">Update Child</button>
+    <br>
+    
+    <a href="{{ url_for('view_children') }}">Back</a>
   </form>
 </body>
 </html>
