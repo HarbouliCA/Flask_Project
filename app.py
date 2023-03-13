@@ -21,6 +21,7 @@ from wtforms import StringField, DateField, SelectField
 from wtforms.validators import DataRequired
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
 from datetime import datetime
+from flask_bcrypt import generate_password_hash
 
 app = Flask(__name__)
 
@@ -77,7 +78,7 @@ user_roles = db.Table('user_roles',
     db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
 
-from flask_bcrypt import generate_password_hash
+
 
 def hash_password(password):
     hashed_password = generate_password_hash(password).decode('utf-8')
@@ -94,6 +95,8 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary= user_roles, lazy='joined',
                              backref=db.backref('users', lazy=True))
 
+
+
     def get_id(self):
         return self.id 
     
@@ -102,6 +105,93 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
+
+
+
+def create_roles():
+    with app.app_context():
+        admin_role = Role(name='admin')
+        # create some roles
+        admin_role = Role.query.filter_by(name='admin').first()
+        if not admin_role:
+            admin_role = Role(name='admin')
+            db.session.add(admin_role)
+
+        manager_role = Role.query.filter_by(name='manager').first()
+        if not manager_role:
+            manager_role = Role(name='manager')
+            db.session.add(manager_role)
+
+        basic_role = Role.query.filter_by(name='basic').first()
+        if not basic_role:
+            basic_role = Role(name='basic')
+            db.session.add(basic_role)
+
+        # create a default admin user
+        admin_user = User.query.filter_by(username='admin').first()
+        if not admin_user:
+            admin_user = User(username='admin', password=bcrypt.generate_password_hash('password').decode('utf-8'))
+            db.session.add(admin_user)
+
+        # add roles to admin user
+        if admin_role not in admin_user.roles:
+            admin_user.roles.append(admin_role)
+        if manager_role not in admin_user.roles:
+            admin_user.roles.append(manager_role)
+        db.session.commit()
+
+
+# Register the function to run after the application context is pushed
+app.before_first_request(create_roles)
+
+
+from functools import wraps
+from flask import abort
+
+def role_required(*roles):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if not current_user.has_roles(*roles):
+                abort(403)  # HTTP status code for "Forbidden"
+            return fn(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
+# Define a decorator for the admin role
+def admin_role_required(func):
+    @wraps(func)
+    @login_required
+    def decorated_view(*args, **kwargs):
+        if 'admin' not in [r.name for r in current_user.roles]:
+            return app.login_manager.unauthorized()
+        return func(*args, **kwargs)
+    return decorated_view
+
+
+# Define a decorator for the manager role
+def manager_role_required(func):
+    @wraps(func)
+    @login_required
+    def decorated_view(*args, **kwargs):
+        if 'manager' not in [r.name for r in current_user.roles]:
+            return app.login_manager.unauthorized()
+        return func(*args, **kwargs)
+    return decorated_view
+
+
+# Define a decorator for the basic role
+def basic_role_required(func):
+    @wraps(func)
+    @login_required
+    def decorated_view(*args, **kwargs):
+        if 'basic' not in [r.name for r in current_user.roles]:
+            return app.login_manager.unauthorized()
+        return func(*args, **kwargs)
+    return decorated_view
+
+
+#comment
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
