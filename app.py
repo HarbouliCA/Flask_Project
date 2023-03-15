@@ -1,11 +1,10 @@
 from flask import current_app
-from wtforms import StringField, SubmitField, BooleanField
+from wtforms import StringField, SubmitField, BooleanField, PasswordField
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField,PasswordField
 from wtforms.validators import DataRequired, InputRequired, Length, ValidationError, NumberRange 
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -13,15 +12,15 @@ from email_validator import validate_email, EmailNotValidError
 from flask_wtf.csrf import CSRFProtect
 import uuid
 from datetime import datetime
-from flask_security import UserMixin
 import os
-from flask_bcrypt import Bcrypt
+from flask_bcrypt import Bcrypt, generate_password_hash
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, SelectField
 from wtforms.validators import DataRequired
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
 from datetime import datetime
-from flask_bcrypt import generate_password_hash
+from flask_bootstrap import Bootstrap
+
 
 app = Flask(__name__)
 
@@ -46,7 +45,23 @@ def load_user(id):
         # for example, you can add the admin role like this:      
         return User.query.get(int(id))
 
-
+class Family(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    pere_name = db.Column(db.String(100), nullable=False)
+    maman_name = db.Column(db.String(100), nullable=False)
+    cin = db.Column(db.String(20), nullable=True)
+    Accord_P_Education_parental = db.Column(db.Boolean, default=False, nullable=True)
+    Education_Non_Formelle = db.Column(db.Boolean, default=False, nullable=True)
+    lutte_contre_Travail_des_enfants = db.Column(db.Boolean, default=False, nullable=True)
+    Projet_Sabab_Mutasamih = db.Column(db.Boolean, default=False, nullable=True)
+    CIDEAL_Maroc = db.Column(db.Boolean, default=False, nullable=True)
+    Attestation_scolaire = db.Column(db.Boolean, default=False, nullable=True)
+    Photos = db.Column(db.Boolean, default=False, nullable=True)
+    photocopie_CIN_parents = db.Column(db.Boolean, default=False, nullable=True)
+    Acte_de_naissance = db.Column(db.Boolean, default=False, nullable=True)
+    CIN_du_jeune = db.Column(db.Boolean, default=False, nullable=True)
+    children_id = db.Column(db.Integer, db.ForeignKey('children.id'))
+    children = db.relationship('Children', backref='family')
 
 class Children(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,6 +86,7 @@ class Children(db.Model, UserMixin):
     Auto_emploi = db.Column(db.Boolean, default=False, nullable=True)
     Entry_date = db.Column(db.Date, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 
 
 user_roles = db.Table('user_roles',
@@ -348,9 +364,9 @@ def add_child():
         db.session.commit()
 
         flash('Child added successfully', 'success')
-        return redirect(url_for('view_children'))
+        return redirect(url_for('add_family', child_id=child.id))
 
-    return render_template('add_child.html', form=form)
+    return render_template('add_child.html', title='Add Child Information', form=form)
 
 
 
@@ -379,7 +395,7 @@ def view_children():
 
     
     children = children_query.all()
-    
+   
     return render_template('view_children.html', children=children, search_query=search_query, birthdate_query=birthdate_query, entry_from_query=entry_from_query, entry_to_query=entry_to_query)
 
 
@@ -566,6 +582,52 @@ def delete_user(user_id):
 def user_management():
     users = User.query.all()
     return render_template('user_management.html', users=users)
+
+
+
+class FamilyForm(FlaskForm):
+    pere_name = StringField('Father Name', validators=[DataRequired()])
+    maman_name = StringField('Mother Name', validators=[DataRequired()])
+    cin = StringField('CIN')
+    Accord_P_Education_parental = BooleanField('Accord Parental pour l\'Education')
+    Education_Non_Formelle = BooleanField('Education Non Formelle')
+    lutte_contre_Travail_des_enfants = BooleanField('Lutte contre Travail des enfants')
+    Projet_Sabab_Mutasamih = BooleanField('Projet Sabab Mutasamih')
+    CIDEAL_Maroc = BooleanField('CIDEAL Maroc')
+    Attestation_scolaire = BooleanField('Attestation Scolaire')
+    Photos = BooleanField('Photos')
+    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents')
+    Acte_de_naissance = BooleanField('Acte de Naissance')
+    CIN_du_jeune = BooleanField('CIN du Jeune')
+
+@app.route('/view_family/<int:child_id>')
+def view_family(child_id):
+    child = Children.query.get_or_404(child_id)
+    family = Family.query.filter_by(children_id=child.id).first()
+    form = FamilyForm()
+    return render_template('view_family.html', child=child, family=family, form=form)
+
+@app.route('/add_family', methods=['GET', 'POST'])
+@login_required
+def add_family():
+    child_id = request.args.get('child_id')
+    form = FamilyForm()
+    if form.validate_on_submit():
+        family = Family(pere_name=form.pere_name.data, maman_name=form.maman_name.data, cin=form.cin.data,
+                        Accord_P_Education_parental=form.Accord_P_Education_parental.data,
+                        Education_Non_Formelle=form.Education_Non_Formelle.data,
+                        lutte_contre_Travail_des_enfants=form.lutte_contre_Travail_des_enfants.data,
+                        Projet_Sabab_Mutasamih=form.Projet_Sabab_Mutasamih.data, CIDEAL_Maroc=form.CIDEAL_Maroc.data,
+                        Attestation_scolaire=form.Attestation_scolaire.data, Photos=form.Photos.data,
+                        photocopie_CIN_parents=form.photocopie_CIN_parents.data,
+                        Acte_de_naissance=form.Acte_de_naissance.data, CIN_du_jeune=form.CIN_du_jeune.data,
+                        children_id=child_id)
+        db.session.add(family)
+        db.session.commit()
+        flash('Your family information has been added!', 'success')
+        return redirect(url_for('view_children', child_id=child_id))
+    return render_template('add_family.html', title='Add Family Information', form=form)
+
 
 
 if __name__ == '__main__':
