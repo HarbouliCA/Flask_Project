@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Family Information for {{ child.name }}</title>
-</head>
-<body>
-    
-    <h1>Family Information for {{ child.name }}</h1>
-    <ul>
-        <li><a href="{{ url_for('view_children') }}">Back to Children List</a></li>
+{% extends 'dashboard.html' %}
+
+{% block title %}View Children{% endblock %}
+
+{% block page_content %}
+
+<div class="sidenav">
+    <h3>Family Information for {{ child.name }}</h3>
+    <ul class="navbar">
+        <li class="nav-item"><a href="{{ url_for('view_children') }}">Back to Children List</a></li>
     </ul>
+</div>
     {% if family %}
         <table>
             <tr>
@@ -68,5 +69,4 @@
         <p>No family information found for {{ child.name }}.</p>
     {% endif %}
     
-</body>
-</html>
+{% endblock %}

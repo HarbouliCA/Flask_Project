@@ -24,3 +24,15 @@ $('input[type="time"]').timepicker({
   scrollbar: true
 });
 
+
+document.addEventListener("DOMContentLoaded", function () {
+  var notificationPopup = document.getElementById("notification-popup");
+  if (notificationPopup) {
+    notificationPopup.style.display = "block";
+
+    setTimeout(function () {
+      notificationPopup.style.display = "none";
+    }, 3000); // Display the notification for 3 seconds
+  }
+});
+

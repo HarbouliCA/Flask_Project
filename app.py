@@ -1,4 +1,4 @@
-from flask import current_app
+from flask import current_app, abort
 from wtforms import StringField, SubmitField, BooleanField, PasswordField
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -20,6 +20,7 @@ from wtforms.validators import DataRequired
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
 from datetime import datetime
 from flask_bootstrap import Bootstrap
+from functools import wraps
 
 
 app = Flask(__name__)
@@ -160,9 +161,6 @@ def create_roles():
 # Register the function to run after the application context is pushed
 app.before_first_request(create_roles)
 
-
-from functools import wraps
-from flask import abort
 
 def role_required(*roles):
     def wrapper(fn):
@@ -491,13 +489,13 @@ class LoginFrom(FlaskForm):
                             
     submit = SubmitField("Login")
 
-
 @app.route('/')
 def home():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     else:
         return render_template('index.html')
+
 
 
 @app.route('/dashboard')
@@ -510,6 +508,7 @@ def dashboard():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+        flash(f'{user.username}. You are logged in')
         return redirect(url_for('dashboard'))
     
     form = LoginFrom()
@@ -524,7 +523,6 @@ def login():
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
-
 
 @app.route("/logout")
 def logout():

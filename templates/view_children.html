@@ -1,71 +1,72 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>View Children</title>
-</head>
-<body>
+{% extends 'dashboard.html' %}
 
-  <h1>Children List</h1>
-  <ul>
-    <li><a href="{{ url_for('view_children') }}" class="btn btn-default">Refresh</a></li>
-    <li><a href="{{url_for('add_child')}}">Add Child</a></li>
-    <li><a href="{{ url_for('dashboard') }}">Back</a></li>
-    
+{% block title %}View Children{% endblock %}
 
-    
+{% block page_content %}
+
+<div class="sidenav">
+  <ul class="navbar">
+    <li class="nav-item"><a href="{{ url_for('view_children') }}" class="btn btn-default">Refresh</a></li>
+    <li class="nav-item"><a href="{{url_for('add_child')}}">Add Child</a></li>
+    <li class="nav-item"><a href="{{ url_for('dashboard') }}">Back</a></li>
   </ul>
-   
-  <h3> Search by Name : <form method="GET" action="{{ url_for('view_children') }}">
-    <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name...">
-  <button type="submit">Search</button></h3>
-  
-  <h3> Search by Birthday : <form method="GET" action="{{ url_for('view_children') }}">
-    <input type="date" name="birthdate" value="{{ search_query }}" placeholder="Search by date...">
-  <button type="submit">Search</button></h3>
+</div>
 
-  <h3> Search by Entry Date: </h3>
-  <form method="GET" action="{{ url_for('view_children') }}">
-    <label for="entry_from">From:</label>
-    <input type="date" id="entry_from" name="entry_from" value="{{ entry_from_query }}" placeholder="Enter start date...">
-    <label for="entry_to">To:</label>
-    <input type="date" id="entry_to" name="entry_to" value="{{ entry_to_query }}" placeholder="Enter end date...">
-    
-    <button type="submit">Search</button>
-  </form>
-  
-  
+  <div class="row flex-containe">
+    <div class="flex-item1">
+    <label>Search by Name:</label>
+    <form class="search-form" method="GET" action="{{ url_for('view_children') }}">
+      <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name...">
+      <button type="submit" class="login-button">Search</button>
+    </form>
+  </div>
+  <div class="flex-item1"> 
+    <label>Search by Birthday:</label>
+    <form class="search-form" method="GET" action="{{ url_for('view_children') }}">
+      <input type="date" name="birthdate" value="{{ search_query }}" placeholder="Search by date...">
+      <button type="submit" class="login-button">Search</button>
+    </form>
+  </div>
+  <div class="flex-item1">
+    <label>Search by Entry Date:</label>
+    <form class="search-form" method="GET" action="{{ url_for('view_children') }}">
+      <label for="entry_from">From:</label>
+      <input type="date" id="entry_from" name="entry_from" value="{{ entry_from_query }}" placeholder="Enter start date...">
+      <label for="entry_to">To:</label>
+      <input type="date" id="entry_to" name="entry_to" value="{{ entry_to_query }}" placeholder="Enter end date...">
+      <button type="submit" class="login-button">Search</button>
+    </form>
+  </div>
+  </div>
 
-    
-
-</form>
-
-  
-  <table>
+<div class="table-responsive">
+  <table class="table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Contact</th>
-        <th>Sex</th>
-        <th>Birthdate</th>
-        <th>Age</th>
-        <th>Quartier</th>
-        <th>Adresse</th>
-        <th>Family situation</th>
-        <th>Father's profession</th>
-        <th>Mother's profession</th>
-        <th>Number of siblings</th>
-        <th>Health problems</th>
-        <th>Education level</th>
-        <th>Date stopped studying</th>
-        <th>Work experience</th>
-        <th>Job request</th>
-        <th>School insertion</th>
-        <th>Work insertion</th>
-        <th>Self-employment</th>
-        <th>Entry Date</th>
-        <th>Actions</th>
+        <th scope="col">Name</th>
+        <th scope="col">Contact</th>
+        <th scope="col">Sex</th>
+        <th scope="col">Birthdate</th>
+        <th scope="col">Age</th>
+        <th scope="col">Quartier</th>
+        <th scope="col">Adresse</th>
+        <th scope="col">Family situation</th>
+        <th scope="col">Father's profession</th>
+        <th scope="col">Mother's profession</th>
+        <th scope="col">Number of siblings</th>
+        <th scope="col">Health problems</th>
+        <th scope="col">Education level</th>
+        <th scope="col">Date stopped studying</th>
+        <th scope="col">Work experience</th>
+        <th scope="col">Job request</th>
+        <th scope="col">School insertion</th>
+        <th scope="col">Work insertion</th>
+        <th scope="col">Self-employment</th>
+        <th scope="col">Entry Date</th>
+        <th scope="col">Actions</th>
       </tr>
     </thead>
+
     <tbody>
       {% for child in children %}
       <tr>
@@ -104,5 +105,5 @@
       {% endfor %}
     </tbody>
   </table>
-</body>
-</html>
+</div>
+{% endblock %}

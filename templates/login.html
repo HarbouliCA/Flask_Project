@@ -1,26 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-</head>
+{% extends 'base.html' %}
 
+{% block body_class %}red-background{% endblock %}
 
-<body>
-  <h1>Login page</h1><a href="{{url_for('home')}}">Home page</a> <br>
+{% block title %}Login{% endblock %}
+
+{% block page_content %}
+<div class="login-body">
+
+</div>
   
-
-  <form method="POST" action="">
+<div class="centered-login-box">
+  <h1 class="login-head">Login :</h1>
+  <form method="POST" action="" class="login-form">
     {{ form.hidden_tag() }}
     {{ form.username }}
     {{ form.password }}
-    {{ form.submit }}
+    <div class="button-container">
+    {{ form.submit (class_="login-button") }}
+  </div>
   </form>
-
-</body>
-
-
-
-</html>
+</div>
+{% endblock %}
