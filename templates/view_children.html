@@ -6,7 +6,7 @@
 
 <div class="sidenav">
   <ul class="navbar">
-    <li class="nav-item"><a href="{{ url_for('view_children') }}" class="btn btn-default">Refresh</a></li>
+    <li class="nav-item"><a href="{{ url_for('view_children') }}">Refresh</a></li>
     <li class="nav-item"><a href="{{url_for('add_child')}}">Add Child</a></li>
     <li class="nav-item"><a href="{{ url_for('dashboard') }}">Back</a></li>
   </ul>
@@ -92,13 +92,12 @@
         <td>{{ child.Entry_date }}</td>
         
         <td><a href="{{ url_for('view_family', child_id=child.id) }}" class="btn btn-default">More</a></td>
-
-        <td><button type="submit" class="btn btn-edit"><a href="{{ url_for('edit_child', id=child.id) }}">Edit</a></button> | 
+        <td><button type="submit" class="btn btn-default"><a href="{{ url_for('edit_child', id=child.id) }}">Edit</a></button></td> | 
           <form method="post" action="{{ url_for('delete_child', id=child.id) }}">
             <input type="hidden" name="_method" value="delete">
-            <button type="submit" class="btn btn-danger">Delete</button>
+            <td><button type="submit" class="btn btn-danger">Delete</button></td>
           </form>
-        </td>
+        
 
         
       </tr>

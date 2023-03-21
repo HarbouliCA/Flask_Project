@@ -21,7 +21,9 @@ from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
 from datetime import datetime
 from flask_bootstrap import Bootstrap
 from functools import wraps
-
+import sqlite3
+import plotly.graph_objs as go
+import plotly.offline as opy
 
 app = Flask(__name__)
 
@@ -160,7 +162,6 @@ def create_roles():
 
 # Register the function to run after the application context is pushed
 app.before_first_request(create_roles)
-
 
 def role_required(*roles):
     def wrapper(fn):
@@ -497,12 +498,95 @@ def home():
         return render_template('index.html')
 
 
-
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    # get current user's username
     username = current_user.username
-    return render_template('dashboard.html', user=username)
+    
+    # count number of children by gender
+    gender_counts = Children.query.with_entities(Children.sex, db.func.count()).group_by(Children.sex).all()
+    
+    # count number of children by demande category
+    demande_counts = Children.query.with_entities(
+        Children.Demande,
+        db.func.count()
+        ).group_by(Children.Demande).all()
+    
+    # prepare data for chart
+    demande_labels = [result[0] for result in demande_counts]
+    demande_counts = [result[1] for result in demande_counts]
+    # create Plotly chart
+    demande_chart = go.Figure(data=[go.Bar(x=demande_labels, y=demande_counts)])
+    demande_chart.update_layout(title='Number of Children by Demande Category',
+                            xaxis_title='Demande Category',
+                            yaxis_title='Number of Children')
+    
+    # generate HTML for chart
+    demande_chart = opy.plot(demande_chart, auto_open=False, output_type='div')
+    
+    # count number of children by age group
+    age_counts = Children.query.with_entities(
+        db.case(
+            
+                (Children.age <= 6, '0-6'),
+                (Children.age <= 12, '7-12'),
+                (Children.age <= 18, '13-18'),
+                else_='18+'
+        ).label('age_group'),
+        db.func.count()
+    ).group_by('age_group').all()
+
+    # prepare data for charts
+    gender_labels = [result[0].capitalize() for result in gender_counts]
+    gender_counts = [result[1] for result in gender_counts]
+
+    age_labels = [result[0] for result in age_counts]
+    age_counts = [result[1] for result in age_counts]
+
+    # create Plotly charts
+    gender_chart = go.Figure(data=[go.Bar(x=gender_labels, y=gender_counts)])
+    gender_chart.update_layout(title='Number of Children by Gender',
+                               xaxis_title='Gender',
+                               yaxis_title='Number of Children')
+
+    age_chart = go.Figure(data=[go.Bar(x=age_labels, y=age_counts)])
+    age_chart.update_layout(title='Number of Children by Age Group',
+                             xaxis_title='Age Group',
+                             yaxis_title='Number of Children')
+    
+
+
+   
+
+    # count number of children by school insertion, work insertion, and self-employment
+    school_counts = Children.query.filter_by(Insertion_scolaire=True).count()
+    work_counts = Children.query.filter_by(Insertion_salariale=True).count()
+    self_employment_counts = Children.query.filter_by(Auto_emploi=True).count()
+
+    request_labels = ['School Insertion', 'Work Insertion', 'Self-Employment']
+    request_counts = [school_counts, work_counts, self_employment_counts]
+
+    request_chart = go.Figure(data=[go.Bar(x=request_labels, y=request_counts)])
+    request_chart.update_layout(title='Number of Children by Request Type',
+                                 xaxis_title='Request Type',
+                                 yaxis_title='Number of Children')
+
+ # generate HTML for charts
+    gender_chart = opy.plot(gender_chart, auto_open=False, output_type='div')
+    age_chart = opy.plot(age_chart, auto_open=False, output_type='div')
+    request_chart = opy.plot(request_chart, auto_open=False, output_type='div')
+
+    # pass charts and user to template
+    return render_template('dashboard.html',
+                           gender_chart=gender_chart,
+                           age_chart=age_chart,
+                           demande_chart=demande_chart,
+                           request_chart = request_chart,
+                           user=username)
+
+
+
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -625,6 +709,8 @@ def add_family():
         flash('Your family information has been added!', 'success')
         return redirect(url_for('view_children', child_id=child_id))
     return render_template('add_family.html', title='Add Family Information', form=form)
+
+
 
 
 

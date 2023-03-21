@@ -3,9 +3,8 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block page_content %}
-<div id="notification-popup" class="notification-popup">
-  {{ user }}. You are logged in
-</div>
+
+<div><h6>{{ user }}. You are logged in</h6></div>
 <div class="sidenav">
   <ul class="navbar">
     <li class="nav-item"><a href="{{url_for('view_children')}}">View Children</a></li>
@@ -18,4 +17,58 @@
   </ul>
 </div>
 
+<div class="container-fluid">
+  <div class="row">
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          Number of Children by Gender
+        </div>
+        <div class="card-body">
+          {{ gender_chart|safe }}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          Number of Children by Age Group
+        </div>
+        <div class="card-body">
+          {{ age_chart|safe }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row mt-3">
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          Number of Children by Demand Category
+        </div>
+        <div class="card-body">
+          {{ demande_chart|safe }}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          Number of Children by Request
+        </div>
+        <div class="card-body">
+          {{ request_chart|safe }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
 {% endblock %}

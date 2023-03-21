@@ -39,19 +39,6 @@ li {
   margin: 0 1rem;
 }
 
-a {
-  text-decoration: none;
-  color: #333;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.3s ease;
-}
-
-a:hover {
-  background-color: #686767;
-}
-
-
 .flex-container.row {
   display: flex;
   flex-wrap: wrap;
@@ -79,12 +66,16 @@ h4 {
   font-size: 1rem;
   padding: 1rem;
   background-color: #2da5ad;
-  border-radius: 100rem;
+  border-radius: 10rem;
   text-align: center;
-  width: 40%;
-  margin: 10px 0px 0px 10px;
+  width: 50%;
+
 }
 
+.display-4{
+  text-align: center;
+  margin: 10px 0px 0px 450px;
+}
 
 
 .centered-login-box {
@@ -133,7 +124,7 @@ h4 {
 }
 
 .red-button:hover {
-  background-color: #daf154;
+  background-color: #20049c;
   color: white;
 }
 
@@ -184,11 +175,25 @@ table {
   margin-bottom: 0px;
 }
 
-k-grid {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-style: solid;
-  border-width: 0 1px 0 0;
-  zoom: 1;
+
+.btn-default {
+  color: #fff;
+  background-color: #0f12cf;
+  border-color: #1707f1;
 }
+
+.btn- {
+  color: #fff;
+  background-color: #191b97;
+  border-color: #1707f1;
+}
+
+
+a {
+  text-decoration: none;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
