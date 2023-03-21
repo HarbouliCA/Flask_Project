@@ -91,11 +91,12 @@ h4 {
   width: 500px;
   height: 300px;
   margin: auto;
-  padding: 20px;
+  padding: 10px;
   border: 1px solid #020202;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
+
 }
 
 .red-background {
@@ -197,3 +198,24 @@ a {
   transition: background-color 0.3s ease;
 }
 
+.my-custom-class {
+  margin: 2px;
+}
+
+.card-header{
+  text-align: center;
+  background-color: #eff6fd;
+  color: #065495;
+  border: 1px solid #b8c9db;
+  font-size: 1.2rem;
+}
+
+
+.tiny-text {
+  color: #b8b8b8;
+  font-size: 12px;
+  text-align: right;
+  margin-top: 20px;
+  margin-bottom: 0px;
+
+}

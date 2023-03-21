@@ -554,10 +554,7 @@ def dashboard():
     age_chart.update_layout(title='Number of Children by Age Group',
                              xaxis_title='Age Group',
                              yaxis_title='Number of Children')
-    
-
-
-   
+  
 
     # count number of children by school insertion, work insertion, and self-employment
     school_counts = Children.query.filter_by(Insertion_scolaire=True).count()
@@ -592,7 +589,7 @@ def dashboard():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        flash(f'{user.username}. You are logged in')
+        
         return redirect(url_for('dashboard'))
     
     form = LoginFrom()
