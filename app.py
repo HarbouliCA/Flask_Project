@@ -20,6 +20,7 @@ from functools import wraps
 import sqlite3
 import plotly.graph_objs as go
 import plotly.offline as opy
+import plotly.express as px
 
 app = Flask(__name__)
 
@@ -316,10 +317,11 @@ class AddChildForm(FlaskForm):
     date_arret_etudes = DateField('Date stopped studying', validators=[DataRequired()])
     Experience_professionnelle = StringField('Work experience', validators=[DataRequired()])
     Demande = StringField('Job request', validators=[DataRequired()])
+    Entry_date = DateField('Entry_date', validators=[DataRequired()])
     Insertion_scolaire = BooleanField('School insertion')
     Insertion_salariale = BooleanField('Work insertion')
     Auto_emploi = BooleanField('Self-employment')
-    Entry_date = DateField('Entry_date', validators=[DataRequired()])
+    
     submit = SubmitField('Add Child')
 
 #class PositiveIntegerField(IntegerField):
@@ -336,10 +338,10 @@ def add_child():
         child = Children(name=form.name.data,
                       contact=form.contact.data,
                       sex=form.sex.data,
-                      Date_naissance=form.birthdate.data,
+                      Date_naissance=form.Date_naissance.data,
                       age=form.age.data,
-                      Quartier=form.quartier.data,
-                      Adresse=form.adresse.data,
+                      Quartier=form.Quartier.data,
+                      Adresse=form.Adresse.data,
                       situation_familliale=form.situation_familliale.data,
                       Fonction_pere=form.Fonction_pere.data,
                       Fonction_mere=form.Fonction_mere.data,
@@ -550,7 +552,7 @@ def dashboard():
                                xaxis_title='Gender',
                                yaxis_title='Number of Children')
 
-    age_chart = go.Figure(data=[go.Bar(x=age_labels, y=age_counts)])
+    age_chart = go.Figure(data=[go.Bar(x=age_labels, y=age_counts, marker=dict(color='green'))])
     age_chart.update_layout(title='Number of Children by Age Group',
                              xaxis_title='Age Group',
                              yaxis_title='Number of Children')
@@ -564,7 +566,7 @@ def dashboard():
     request_labels = ['School Insertion', 'Work Insertion', 'Self-Employment']
     request_counts = [school_counts, work_counts, self_employment_counts]
 
-    request_chart = go.Figure(data=[go.Bar(x=request_labels, y=request_counts)])
+    request_chart = go.Figure(data=[go.Bar(x=request_labels, y=request_counts, marker=dict(color='red'))])
     request_chart.update_layout(title='Number of Children by Request Type',
                                  xaxis_title='Request Type',
                                  yaxis_title='Number of Children')
@@ -581,9 +583,6 @@ def dashboard():
                            demande_chart=demande_chart,
                            request_chart = request_chart,
                            user=username)
-
-
-
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -673,11 +672,11 @@ class FamilyForm(FlaskForm):
     lutte_contre_Travail_des_enfants = BooleanField('Lutte contre Travail des enfants')
     Projet_Sabab_Mutasamih = BooleanField('Projet Sabab Mutasamih')
     CIDEAL_Maroc = BooleanField('CIDEAL Maroc')
-    Attestation_scolaire = BooleanField('Attestation Scolaire')
+    Attestation_scolaire = BooleanField('Attestation Scolaire', default=False)
     Photos = BooleanField('Photos')
-    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents')
-    Acte_de_naissance = BooleanField('Acte de Naissance')
-    CIN_du_jeune = BooleanField('CIN du Jeune')
+    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents', default=False)
+    Acte_de_naissance = BooleanField('Acte de Naissance', default=False)
+    CIN_du_jeune = BooleanField('CIN du Jeune', default=False)
 
 @app.route('/view_family/<int:child_id>')
 def view_family(child_id):

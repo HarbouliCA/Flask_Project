@@ -3,11 +3,18 @@
 {% block title %}add child{% endblock %}
 
 {% block page_content %}
-  <h1>Add Child</h1>
-  
+  <div class="row mb-3">
+    <div class="sidenav">
+      <a href="{{ url_for('view_children') }}" class="nav-item">Back</a>
+      <a href="{{ url_for('add_child') }}" class="nav-item">Refresh</a>
+    </div>
+  </div>
   <form method="POST" action="{{ url_for('add_child') }}">
     {{ form.csrf_token }}
     <div class="container">
+      <div class="text-center">
+        {{ form.submit(class_="btn btn-primary") }}
+        </div>
       <div class="row">
         {% for field in form %}
           {% if field.type != 'SubmitField' and field.type != 'CSRFTokenField' %}
@@ -28,9 +35,7 @@
         {% endfor %}
       </div>
     </div>
-    <div>
-    {{ form.submit(class_="btn btn-primary") }}
-    </div>
+
   </form>
 
 {% endblock %}
