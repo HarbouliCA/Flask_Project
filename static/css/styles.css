@@ -159,9 +159,20 @@ h4 {
   padding: 0;
 }
 
+
+.navbar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  padding-bottom: 0rem;
+}
+
 .nav-item {
   display: inline-block;
-  padding: 0 20px 0 7px;
+  padding: 0 15px 0 7px;
   position: relative;
 }
 
@@ -237,4 +248,13 @@ a {
 
 .wider-column {
   min-width: 100px;
+}
+
+table td {
+  width: 50%;
+  text-align: center;
+}
+
+.table-bordered{
+  width: 70%;
 }
