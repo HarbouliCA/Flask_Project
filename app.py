@@ -303,21 +303,21 @@ class AddChildForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     contact = StringField('Contact', validators=[DataRequired()])
     sex = SelectField('Gender', choices=[('male', 'Male'), ('female', 'Female')], validators=[DataRequired()])
-    birthdate = DateField('Birthdate', validators=[DataRequired()])
+    Date_naissance = DateField('Birthdate', validators=[DataRequired()])
     age = IntegerField('Age', validators=[DataRequired(), NumberRange(min=0)])
-    quartier = StringField('Quartier', validators=[DataRequired()])
-    adresse = StringField('Address', validators=[DataRequired()])
+    Quartier = StringField('Quartier', validators=[DataRequired()])
+    Adresse = StringField('Address', validators=[DataRequired()])
     situation_familliale = StringField('Family situation', validators=[DataRequired()])
-    fonction_pere = StringField("Father's profession", validators=[DataRequired()])
-    fonction_mere = StringField("Mother's profession", validators=[DataRequired()])
-    fraterie = StringField('Number of siblings', validators=[DataRequired()])
-    problemes_sante = StringField('Health problems', validators=[DataRequired()])
-    niveau_scolaire = StringField('Education level', validators=[DataRequired()])
+    Fonction_pere = StringField("Father's profession", validators=[DataRequired()])
+    Fonction_mere = StringField("Mother's profession", validators=[DataRequired()])
+    Fraterie = StringField('Number of siblings', validators=[DataRequired()])
+    Problemes_sante = StringField('Health problems', validators=[DataRequired()])
+    Niveau_scolaire = StringField('Education level', validators=[DataRequired()])
     date_arret_etudes = DateField('Date stopped studying', validators=[DataRequired()])
-    experience_professionnelle = StringField('Work experience', validators=[DataRequired()])
-    demande = StringField('Job request', validators=[DataRequired()])
-    insertion_scolaire = BooleanField('School insertion')
-    insertion_salariale = BooleanField('Work insertion')
+    Experience_professionnelle = StringField('Work experience', validators=[DataRequired()])
+    Demande = StringField('Job request', validators=[DataRequired()])
+    Insertion_scolaire = BooleanField('School insertion')
+    Insertion_salariale = BooleanField('Work insertion')
     Auto_emploi = BooleanField('Self-employment')
     Entry_date = DateField('Entry_date', validators=[DataRequired()])
     submit = SubmitField('Add Child')
@@ -341,16 +341,16 @@ def add_child():
                       Quartier=form.quartier.data,
                       Adresse=form.adresse.data,
                       situation_familliale=form.situation_familliale.data,
-                      Fonction_pere=form.fonction_pere.data,
-                      Fonction_mere=form.fonction_mere.data,
-                      Fraterie=form.fraterie.data,
-                      Problemes_sante=form.problemes_sante.data,
-                      Niveau_scolaire=form.niveau_scolaire.data,
+                      Fonction_pere=form.Fonction_pere.data,
+                      Fonction_mere=form.Fonction_mere.data,
+                      Fraterie=form.Fraterie.data,
+                      Problemes_sante=form.Problemes_sante.data,
+                      Niveau_scolaire=form.Niveau_scolaire.data,
                       date_arret_etudes=form.date_arret_etudes.data,
-                      Experience_professionnelle=form.experience_professionnelle.data,
-                      Demande=form.demande.data,
-                      Insertion_scolaire=form.insertion_scolaire.data,
-                      Insertion_salariale=form.insertion_salariale.data,
+                      Experience_professionnelle=form.Experience_professionnelle.data,
+                      Demande=form.Demande.data,
+                      Insertion_scolaire=form.Insertion_scolaire.data,
+                      Insertion_salariale=form.Insertion_salariale.data,
                       Auto_emploi=form.Auto_emploi.data,
                       Entry_date=form.Entry_date.data)
 
@@ -422,21 +422,21 @@ def edit_child(id):
         form.name.data = child.name
         form.contact.data = child.contact
         form.sex.data = child.sex
-        form.birthdate.data = child.Date_naissance
+        form.Date_naissance.data = child.Date_naissance
         form.age.data = child.age
-        form.quartier.data = child.Quartier
-        form.adresse.data = child.Adresse
+        form.Quartier.data = child.Quartier
+        form.Adresse.data = child.Adresse
         form.situation_familliale.data = child.situation_familliale
-        form.fonction_pere.data = child.Fonction_pere
-        form.fonction_mere.data = child.Fonction_mere
-        form.fraterie.data = child.Fraterie
-        form.problemes_sante.data = child.Problemes_sante
-        form.niveau_scolaire.data = child.Niveau_scolaire
+        form.Fonction_pere.data = child.Fonction_pere
+        form.Fonction_mere.data = child.Fonction_mere
+        form.Fraterie.data = child.Fraterie
+        form.Problemes_sante.data = child.Problemes_sante
+        form.Niveau_scolaire.data = child.Niveau_scolaire
         form.date_arret_etudes.data = child.date_arret_etudes
-        form.experience_professionnelle.data = child.Experience_professionnelle
-        form.demande.data = child.Demande
-        form.insertion_scolaire.data = child.Insertion_scolaire
-        form.insertion_salariale.data = child.Insertion_salariale
+        form.Experience_professionnelle.data = child.Experience_professionnelle
+        form.Demande.data = child.Demande
+        form.Insertion_scolaire.data = child.Insertion_scolaire
+        form.Insertion_salariale.data = child.Insertion_salariale
         form.Auto_emploi.data = child.Auto_emploi
         form.Entry_date.data = child.Entry_date
         
