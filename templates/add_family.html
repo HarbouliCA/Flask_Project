@@ -1,68 +1,40 @@
 {% extends "base.html" %}
 
-
-{% block title %}add Family{% endblock %}
-
+{% block title %}add family{% endblock %}
 
 {% block page_content %}
+ <div>
+    <h3 class="text-center">
+        Family information
+    </h3>
+ </div>
+  <form method="POST">
+    {{ form.csrf_token }}
+    <div class="container">
+      <div class="row">
+        {% for field in form %}
+          {% if field.type != 'SubmitField' and field.type != 'CSRFTokenField' %}
+            <div class="col-md-4 mb-3">
+              <div class="form-group">
+                {% if field.type == 'BooleanField' %}
+                  <div class="form-check">
+                    {{ field(class_="form-check-input") }}
+                    {{ field.label(class_="form-check-label") }}
+                  </div>
+                {% else %}
+                  {{ field.label }}
+                  {{ field(class_="form-control") }}
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
 
-    <h1>Add Family Information</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <table>
-            <tr>
-                <th>Father's Name</th>
-                <td>{{ form.pere_name() }}</td>
-            </tr>
-            <tr>
-                <th>Mother's Name</th>
-                <td>{{ form.maman_name() }}</td>
-            </tr>
-            <tr>
-                <th>CIN</th>
-                <td>{{ form.cin() }}</td>
-            </tr>
-            <tr>
-                <th>Accord Parental pour l'Education</th>
-                <td>{{ form.Accord_P_Education_parental() }}</td>
-            </tr>
-            <tr>
-                <th>Education Non Formelle</th>
-                <td>{{ form.Education_Non_Formelle() }}</td>
-            </tr>
-            <tr>
-                <th>Lutte contre Travail des enfants</th>
-                <td>{{ form.lutte_contre_Travail_des_enfants() }}</td>
-            </tr>
-            <tr>
-                <th>Projet Sabab Mutasamih</th>
-                <td>{{ form.Projet_Sabab_Mutasamih() }}</td>
-            </tr>
-            <tr>
-                <th>CIDEAL Maroc</th>
-                <td>{{ form.CIDEAL_Maroc() }}</td>
-            </tr>
-            <tr>
-                <th>Attestation Scolaire</th>
-                <td>{{ form.Attestation_scolaire() }}</td>
-            </tr>
-            <tr>
-                <th>Photos</th>
-                <td>{{ form.Photos() }}</td>
-            </tr>
-            <tr>
-                <th>Photocopie CIN des Parents</th>
-                <td>{{ form.photocopie_CIN_parents() }}</td>
-            </tr>
-            <tr>
-                <th>Acte de Naissance</th>
-                <td>{{ form.Acte_de_naissance() }}</td>
-            </tr>
-            <tr>
-                <th>CIN du Jeune</th>
-                <td>{{ form.CIN_du_jeune() }}</td>
-            </tr>
-        </table>
-        <input type="submit" value="Submit">
-    </form>
+  </form>
+
 {% endblock %}

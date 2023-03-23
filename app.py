@@ -1,9 +1,8 @@
 from flask import current_app, abort
-from wtforms import StringField, SubmitField, BooleanField, PasswordField
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
-from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin
+from flask_security import Security, SQLAlchemyUserDatastore, RoleMixin
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, InputRequired, Length, ValidationError, NumberRange 
 from flask_admin import Admin
@@ -14,11 +13,8 @@ import uuid
 from datetime import datetime
 import os
 from flask_bcrypt import Bcrypt, generate_password_hash
-from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, SelectField
-from wtforms.validators import DataRequired
+from wtforms import DateField, SelectField, PasswordField
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
-from datetime import datetime
 from flask_bootstrap import Bootstrap
 from functools import wraps
 import sqlite3
@@ -373,6 +369,7 @@ def add_child():
 @login_required
 def view_children():
     search_query = request.args.get('q', '')
+    job_query = request.args.get('job', '')
     birthdate_query = request.args.get('birthdate', '')
     entry_from_query = request.args.get('entry_from', '')
     entry_to_query = request.args.get('entry_to', '')
@@ -381,6 +378,9 @@ def view_children():
     
     if search_query:
         children_query = children_query.filter(Children.name.ilike(f'%{search_query}%'))
+
+    if job_query:
+        children_query = children_query.filter(Children.Demande.ilike(f'%{job_query}%'))
     
     if birthdate_query:
         birthdate = datetime.strptime(birthdate_query, '%Y-%m-%d').date()
@@ -395,7 +395,7 @@ def view_children():
     
     children = children_query.all()
    
-    return render_template('view_children.html', children=children, search_query=search_query, birthdate_query=birthdate_query, entry_from_query=entry_from_query, entry_to_query=entry_to_query)
+    return render_template('view_children.html', children=children, search_query=search_query, job_query=job_query, birthdate_query=birthdate_query, entry_from_query=entry_from_query, entry_to_query=entry_to_query)
 
 
 

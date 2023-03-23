@@ -219,3 +219,22 @@ a {
   margin-bottom: 0px;
 
 }
+
+
+.sidenav > a {
+  color: #065495;
+  height: 30px;
+  padding: 5px 100px 40px 5px;
+  font-size: 21px;
+  font-weight: bold;
+  padding-left: 28px;
+  
+}
+
+.me-2{
+  max-width: 180px;
+}
+
+.wider-column {
+  min-width: 100px;
+}
