@@ -258,3 +258,20 @@ table td {
 .table-bordered{
   width: 70%;
 }
+
+
+.custom-form {
+  max-width: 500px;
+  padding-left: 40px;
+
+}
+
+
+.label-edit{
+  color: #003399;
+  padding-bottom: 5px;
+  font-size: 1.3rem;
+  font-family: 'Times New Roman', Times, serif;
+  padding-top: 5px; 
+  
+}
