@@ -748,7 +748,7 @@ def edit_family(child_id):
         form.Acte_de_naissance.data = family.Acte_de_naissance
         form.CIN_du_jeune.data = family.CIN_du_jeune
 
-    return render_template('edit_family.html', form=form, family=family)
+    return render_template('edit_family.html', form=form, family=family, child_id=child_id)
 
 
 
