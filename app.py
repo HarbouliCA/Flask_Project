@@ -668,24 +668,27 @@ def user_management():
 
 
 class FamilyForm(FlaskForm):
-    pere_name = StringField('Father Name', validators=[DataRequired()])
-    maman_name = StringField('Mother Name', validators=[DataRequired()])
-    cin = StringField('CIN')
+    pere_name = StringField('Pere Name', validators=[DataRequired(), Length(min=2, max=100)])
+    maman_name = StringField('Maman Name', validators=[DataRequired(), Length(min=2, max=100)])
+    cin = StringField('CIN', validators=[Length(max=20)])
     Accord_P_Education_parental = BooleanField('Accord Parental pour l\'Education')
     Education_Non_Formelle = BooleanField('Education Non Formelle')
     lutte_contre_Travail_des_enfants = BooleanField('Lutte contre Travail des enfants')
     Projet_Sabab_Mutasamih = BooleanField('Projet Sabab Mutasamih')
     CIDEAL_Maroc = BooleanField('CIDEAL Maroc')
-    Attestation_scolaire = BooleanField('Attestation Scolaire', default=False)
+    Attestation_scolaire = BooleanField('Attestation Scolaire')
     Photos = BooleanField('Photos')
-    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents', default=False)
-    Acte_de_naissance = BooleanField('Acte de Naissance', default=False)
-    CIN_du_jeune = BooleanField('CIN du Jeune', default=False)
+    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents')
+    Acte_de_naissance = BooleanField('Acte de Naissance')
+    CIN_du_jeune = BooleanField('CIN du Jeune')
+    submit = SubmitField('Save')
+
 
 @app.route('/view_family/<int:child_id>')
 def view_family(child_id):
     child = Children.query.get_or_404(child_id)
     family = Family.query.filter_by(children_id=child.id).first()
+    print("Family data:", family.__dict__)
     form = FamilyForm()
     return render_template('view_family.html', child=child, family=family, form=form)
 
@@ -695,6 +698,7 @@ def add_family():
     child_id = request.args.get('child_id')
     form = FamilyForm()
     if form.validate_on_submit():
+        print("Form data:", form.data)
         family = Family(pere_name=form.pere_name.data, maman_name=form.maman_name.data, cin=form.cin.data,
                         Accord_P_Education_parental=form.Accord_P_Education_parental.data,
                         Education_Non_Formelle=form.Education_Non_Formelle.data,
@@ -706,6 +710,7 @@ def add_family():
                         children_id=child_id)
         db.session.add(family)
         db.session.commit()
+        db.session.refresh(family)
         flash('Your family information has been added!', 'success')
         return redirect(url_for('view_children', child_id=child_id))
     return render_template('add_family.html', title='Add Family Information', form=form)

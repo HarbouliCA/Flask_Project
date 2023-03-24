@@ -27,48 +27,49 @@
               </tr>
               <tr>
                   <th>Accord Parental pour l'Education</th>
-                  <td>{{ 'Yes' if family.Accord_P_Education_parental else 'No' }}</td>
+                  <td>{{ family.Accord_P_Education_parental  }}</td>
               </tr>
               <tr>
                   <th>Education Non Formelle</th>
-                  <td>{{ 'Yes' if family.Education_Non_Formelle else 'No' }}</td>
+                  <td>{{ family.Education_Non_Formelle  }}</td>
               </tr>
               <tr>
                   <th>Lutte contre Travail des enfants</th>
-                  <td>{{ 'Yes' if family.lutte_contre_Travail_des_enfants else 'No' }}</td>
+                  <td>{{ family.lutte_contre_Travail_des_enfants  }}</td>
               </tr>
               <tr>
                   <th>Projet Sabab Mutasamih</th>
-                  <td>{{ 'Yes' if family.Projet_Sabab_Mutasamih else 'No' }}</td>
+                  <td>{{ family.Projet_Sabab_Mutasamih  }}</td>
               </tr>
               <tr>
                   <th>CIDEAL Maroc</th>
-                  <td>{{ 'Yes' if family.CIDEAL_Maroc else 'No' }}</td>
+                  <td>{{  family.CIDEAL_Maroc  }}</td>
               </tr>
               <tr>
-                  <th>Attestation Scolaire</th>
-                  <td>{{ 'Yes' if family.Attestation_scolaire else 'No' }}</td>
-              </tr>
-              <tr>
-                  <th>Photos</th>
-                  <td>{{ 'Yes' if family.Photos else 'No' }}</td>
-              </tr>
-              <tr>
-                  <th>Photocopie CIN des Parents</th>
-                  <td>{{ 'Yes' if family.photocopie_CIN_parents else 'No' }}</td>
-              </tr>
-              <tr>
-                  <th>Acte de Naissance</th>
-                  <td>{{ 'Yes' if family.Acte_de_naissance else 'No' }}</td>
-              </tr>
-              <tr>
-                  <th>CIN du Jeune</th>
-                  <td>{{ 'Yes' if family.CIN_du_jeune else 'No' }}</td>
-              </tr>
-          </table>
-        </div>
-    {% else %}
-        <p>No family information found for {{ child.name }}.</p>
-    {% endif %}
+                <th>Attestation Scolaire</th>
+                <td>{{family.Attestation_scolaire }}</td>
+            </tr>
+            <tr>
+                <th>Photos</th>
+                <td>{{family.Photos }}</td>
+            </tr>
+            <tr>
+                <th>Photocopie CIN des Parents</th>
+                <td>{{  family.photocopie_CIN_parents  }}</td>
+            </tr>
+            <tr>
+                <th>Acte de Naissance</th>
+                <td>{{  family.Acte_de_naissance  }}</td>
+            </tr>
+            <tr>
+                <th>CIN du Jeune</th>
+                <td>{{  family.CIN_du_jeune  }}</td>
+            </tr>
+            
+        </table>
+    </div>
+{% else %}
+    <p>No family information found for {{ child.name }}.</p>
+{% endif %}
     
 {% endblock %}

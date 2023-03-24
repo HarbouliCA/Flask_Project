@@ -28,18 +28,72 @@
     {{ form.cin(class_="form-control") }}
   </div>
 
-  {% for field in form %}
-    {% if field.type == 'BooleanField' %}
+  <div class="form-group">
+    <div class="form-check form-check-inline">
+      {{ form.Accord_P_Education_parental(class_="form-check-input", checked=form.Accord_P_Education_parental.data) }}
+      <label for="{{ form.Accord_P_Education_parental.id }}" class="form-check-label">{{ form.Accord_P_Education_parental.label }}</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-check form-check-inline">
+      {{ form.Education_Non_Formelle(class_="form-check-input", checked=form.Education_Non_Formelle.data) }}
+      <label for="{{ form.Education_Non_Formelle.id }}" class="form-check-label">{{ form.Education_Non_Formelle.label }}</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-check form-check-inline">
+      {{ form.lutte_contre_Travail_des_enfants(class_="form-check-input", checked=form.lutte_contre_Travail_des_enfants.data) }}
+      <label for="{{ form.lutte_contre_Travail_des_enfants.id }}" class="form-check-label">{{ form.lutte_contre_Travail_des_enfants.label }}</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-check form-check-inline">
+      {{ form.Projet_Sabab_Mutasamih(class_="form-check-input", checked=form.Projet_Sabab_Mutasamih.data) }}
+      <label for="{{ form.Projet_Sabab_Mutasamih.id }}" class="form-check-label">{{ form.Projet_Sabab_Mutasamih.label }}</label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-check form-check-inline">
+      {{ form.CIDEAL_Maroc(class_="form-check-input", checked=form.CIDEAL_Maroc.data) }}
+      <label for="{{ form.CIDEAL_Maroc.id }}" class="form-check-label">{{ form.CIDEAL_Maroc.label }}</label>
+    </div>
+    
+      </div>
       <div class="form-group">
         <div class="form-check form-check-inline">
-          {{ field(class_="form-check-input") }}
-          <label for="{{ field.id }}" class="form-check-label">{{ field.label }}</label>
+          {{ form.Attestation_scolaire(class_="form-check-input", checked=form.Attestation_scolaire.data) }}
+          <label for="{{ form.Attestation_scolaire.id }}" class="form-check-label">{{ form.Attestation_scolaire.label }}</label>
         </div>
       </div>
-    {% endif %}
-  {% endfor %}
-
-<button type="submit" class="btn btn-primary">Update Family</button>
-
-</form>
-{% endblock %}
+      <div class="form-group">
+        <div class="form-check form-check-inline">
+          {{ form.Photos(class_="form-check-input", checked=form.Photos.data) }}
+          <label for="{{ form.Photos.id }}" class="form-check-label">{{ form.Photos.label }}</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-check form-check-inline">
+          {{ form.photocopie_CIN_parents(class_="form-check-input", checked=form.photocopie_CIN_parents.data) }}
+          <label for="{{ form.photocopie_CIN_parents.id }}" class="form-check-label">{{ form.photocopie_CIN_parents.label }}</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-check form-check-inline">
+          {{ form.Acte_de_naissance(class_="form-check-input", checked=form.Acte_de_naissance.data) }}
+          <label for="{{ form.Acte_de_naissance.id }}" class="form-check-label">{{ form.Acte_de_naissance.label }}</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-check form-check-inline">
+          {{ form.CIN_du_jeune(class_="form-check-input", checked=form.CIN_du_jeune.data) }}
+          <label for="{{ form.CIN_du_jeune.id }}" class="form-check-label">{{ form.CIN_du_jeune.label }}</label>
+        </div>
+      </div>
+    <button type="submit" class="btn btn-primary">Update Family</button>
+    
+    </form>
+    {% endblock %}
