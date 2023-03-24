@@ -462,6 +462,10 @@ def delete_child(id):
 
 
 
+
+
+
+
 class RegisterFrom(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(
         min=4, max=20)], render_kw={"placeholder": "Username"})
@@ -707,6 +711,44 @@ def add_family():
     return render_template('add_family.html', title='Add Family Information', form=form)
 
 
+@app.route('/edit_family/<int:child_id>', methods=['GET', 'POST'])
+@manager_role_required
+@login_required
+def edit_family(child_id):
+    child = Children.query.get(child_id)
+    if child is None:
+        flash('Child not found.', 'danger')
+        return redirect(url_for('view_family', child_id=child_id))
+
+    family = child.family[0]
+    if family is None:
+        flash('Family not found.', 'danger')
+        return redirect(url_for('view_family', child_id=child_id))
+
+    form = FamilyForm(obj=family)
+
+    if form.validate_on_submit():
+        form.populate_obj(family)
+        db.session.commit()
+        flash('Family updated successfully.', 'success')
+        return redirect(url_for('view_family', child_id=child_id))
+    else:
+        # populate form fields with current family data
+        form.pere_name.data = family.pere_name
+        form.maman_name.data = family.maman_name
+        form.cin.data = family.cin
+        form.Accord_P_Education_parental.data = family.Accord_P_Education_parental
+        form.Education_Non_Formelle.data = family.Education_Non_Formelle
+        form.lutte_contre_Travail_des_enfants.data = family.lutte_contre_Travail_des_enfants
+        form.Projet_Sabab_Mutasamih.data = family.Projet_Sabab_Mutasamih
+        form.CIDEAL_Maroc.data = family.CIDEAL_Maroc
+        form.Attestation_scolaire.data = family.Attestation_scolaire
+        form.Photos.data = family.Photos
+        form.photocopie_CIN_parents.data = family.photocopie_CIN_parents
+        form.Acte_de_naissance.data = family.Acte_de_naissance
+        form.CIN_du_jeune.data = family.CIN_du_jeune
+
+    return render_template('edit_family.html', form=form, family=family)
 
 
 
