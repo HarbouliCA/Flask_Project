@@ -61,8 +61,8 @@ class Family(db.Model, UserMixin):
     Acte_de_naissance = db.Column(db.Boolean, default=False, nullable=True)
     CIN_du_jeune = db.Column(db.Boolean, default=False, nullable=True)
     children_id = db.Column(db.Integer, db.ForeignKey('children.id'))
-    children = db.relationship('Children', backref='family')
-
+    child = db.relationship('Children', backref='parent_family')
+  
 class Children(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -86,8 +86,7 @@ class Children(db.Model, UserMixin):
     Auto_emploi = db.Column(db.Boolean, default=False, nullable=True)
     Entry_date = db.Column(db.Date, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-
+    family = db.relationship('Family', backref='associated_child', lazy=True, cascade="all, delete-orphan")
 
 user_roles = db.Table('user_roles',
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
@@ -556,7 +555,7 @@ def dashboard():
                                xaxis_title='Gender',
                                yaxis_title='Number of Children')
 
-    age_chart = go.Figure(data=[go.Bar(x=age_labels, y=age_counts, marker=dict(color='green'))])
+    age_chart = go.Figure(data=[go.Bar(x=age_labels, y=age_counts)])
     age_chart.update_layout(title='Number of Children by Age Group',
                              xaxis_title='Age Group',
                              yaxis_title='Number of Children')
@@ -570,7 +569,7 @@ def dashboard():
     request_labels = ['School Insertion', 'Work Insertion', 'Self-Employment']
     request_counts = [school_counts, work_counts, self_employment_counts]
 
-    request_chart = go.Figure(data=[go.Bar(x=request_labels, y=request_counts, marker=dict(color='red'))])
+    request_chart = go.Figure(data=[go.Bar(x=request_labels, y=request_counts)])
     request_chart.update_layout(title='Number of Children by Request Type',
                                  xaxis_title='Request Type',
                                  yaxis_title='Number of Children')
