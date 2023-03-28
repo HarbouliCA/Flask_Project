@@ -1,22 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit User</title>
-</head>
-<body>
-    <h1>Edit User</h1>
-    <form method="post" action="">
-        {{ form.csrf_token }}
-        <div>
-            {{ form.username.label }} {{ form.username() }}
-        </div>
-        <div>
-            {{ form.password.label }} {{ form.password() }}
-        </div>
-        <button type="submit">Save Changes</button>
-    </form>
-    <ul>
-        <li><a href="{{ url_for('view_children') }}">Back</a></li>
-      </ul>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+      <div class="sidenav">
+        <a href="{{ url_for('user_management') }}" class="nav-item">Back</a>        
+      </div>
+    </div>
+
+<div class="mx-auto" style="max-width: 500px;">
+  
+<form method="post" action="">
+    {{ form.csrf_token }}
+    <div class="mb-3">
+        {{ form.username.label }} {{ form.username(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.password.label }} {{ form.password(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+</div>
+{% endblock %}

@@ -51,29 +51,29 @@
     <table class="table table-striped table-hover">
       <thead>
         <tr>
-        <th scope="col">Name</th>
-        <th scope="col">Contact</th>
-        <th scope="col">Sex</th>
-        <th scope="col">Birthdate</th>
-        <th scope="col">Age</th>
-        <th scope="col">Quartier</th>
-        <th scope="col">Adresse</th>
-        <th scope="col">Family situation</th>
-        <th scope="col">Father's profession</th>
-        <th scope="col">Mother's profession</th>
-        <th scope="col">Number of siblings</th>
-        <th scope="col">Health problems</th>
-        <th scope="col">Education level</th>
-        <th scope="col">Date stopped studying</th>
-        <th scope="col">Work experience</th>
-        <th scope="col">Job request</th>
-        <th scope="col">School insertion</th>
-        <th scope="col">Work insertion</th>
-        <th scope="col">Self-employment</th>
-        <th scope="col">Entry Date</th>
-        <th scope="col">More</th>
-        <th scope="col">Edit</th>
-        <th scope="col">Delete</th>
+        <th scope="col" class="center">Name</th>
+        <th scope="col" class="center">Contact</th>
+        <th scope="col" class="center">Sex</th>
+        <th scope="col" class="center">Birthdate</th>
+        <th scope="col" class="center">Age</th>
+        <th scope="col" class="center">Quartier</th>
+        <th scope="col" class="center">Adresse</th>
+        <th scope="col" class="center">Family situation</th>
+        <th scope="col" class="center">Father's profession</th>
+        <th scope="col" class="center">Mother's profession</th>
+        <th scope="col" class="center" class="center">Number of siblings</th>
+        <th scope="col" class="center">Health problems</th>
+        <th scope="col" class="center">Education level</th>
+        <th scope="col" class="center">Date stopped studying</th>
+        <th scope="col" class="center">Work experience</th>
+        <th scope="col" class="center">Job request</th>
+        <th scope="col" class="center">School insertion</th>
+        <th scope="col" class="center">Work insertion</th>
+        <th scope="col" class="center">Self-employment</th>
+        <th scope="col" class="center">Entry Date</th>
+        <th scope="col" class="center">More</th>
+        <th scope="col" class="center">Edit</th>
+        <th scope="col" class="center">Delete</th>
       </tr>
     </thead>
 
@@ -92,7 +92,9 @@
           <textarea class="form-control" rows="1" style="resize: both;">{{ child.Adresse }}</textarea>
         </td>
         <td>{{ child.situation_familliale }}</td>
-        <td>{{ child.Fonction_pere }}</td>
+        <td>
+          <textarea class="form-control" rows="1" style="resize: both;">{{ child.Fonction_pere }}</textarea>
+        </td>
         <td>{{ child.Fonction_mere }}</td>
         <td>{{ child.Fraterie }}</td>
         <td>
@@ -100,7 +102,9 @@
         </td>
         <td>{{ child.Niveau_scolaire }}</td>
         <td class="wider-column">{{ child.date_arret_etudes.strftime('%Y-%m-%d') }}</td>
-        <td>{{ child.Experience_professionnelle }}</td>
+        <td>
+          <textarea class="form-control" rows="1" style="resize: both;">{{ child.Experience_professionnelle }}</textarea>
+          </td>
         <td>{{ child.Demande }}</td>
         <td>{{ 'Yes' if child.Insertion_scolaire else 'No'}}</td>
         <td>{{ 'Yes' if child.Insertion_salariale else 'No'}}</td>

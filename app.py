@@ -28,6 +28,7 @@ import uuid
 from flask_wtf.file import FileField
 from azure.storage.blob import BlobClient
 
+
 app = Flask(__name__)
 
 # Specify the absolute path to the database file
@@ -39,6 +40,8 @@ app.config['SECRET_KEY'] = 'secretkey'
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
+##
 
 
 login_manager = LoginManager(app)
@@ -94,12 +97,6 @@ class Children(db.Model, UserMixin):
     Entry_date = db.Column(db.Date, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     family = db.relationship('Family', backref='associated_child', lazy=True, cascade="all, delete-orphan")
-
-
-
-
-
-
 
 
 
@@ -815,6 +812,8 @@ def edit_family(child_id):
         return redirect(url_for('view_family', child_id=child_id))
 
     return render_template('edit_family.html', form=form, family=family, child_id=child_id)
+
+
 
 
 

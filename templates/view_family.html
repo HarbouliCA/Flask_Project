@@ -48,7 +48,7 @@
                     <th>Attestation Scolaire</th>
                     <td>
                         {% if family.Attestation_scolaire %}
-                            <a href="{{ family.Attestation_scolaire }}" download>Download Attestation Scolaire</a>
+                            <a class="download_a" href="{{ family.Attestation_scolaire }}" download>Download Attestation Scolaire</a>
                         {% else %}
                             No file uploaded.
                         {% endif %}

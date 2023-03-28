@@ -283,3 +283,17 @@ table td {
   margin-top: 5px;
   margin-bottom: 5px;
 }
+
+.download_a {
+  text-decoration: none;
+  color: blue;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease;
+
+}
+
+
+th.center{
+  text-align: center;
+}
