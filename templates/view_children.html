@@ -96,7 +96,7 @@
         <td>{{ child.Fonction_mere }}</td>
         <td>{{ child.Fraterie }}</td>
         <td>
-          <textarea class="form-control" rows="1" style="resize: both;">{{ child.Problemes_sante }}</textarea>
+          {{ child.Problemes_sante }}
         </td>
         <td>{{ child.Niveau_scolaire }}</td>
         <td class="wider-column">{{ child.date_arret_etudes.strftime('%Y-%m-%d') }}</td>

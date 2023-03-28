@@ -1,40 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}add family{% endblock %}
+{% block title %}Add Family{% endblock %}
 
 {% block page_content %}
- <div>
-    <h3 class="text-center">
-        Family information
-    </h3>
- </div>
-  <form method="POST">
+<div class="container">
+  <h3 class="text-center my-4">Family Information</h3>
+  <form method="POST" enctype="multipart/form-data">
     {{ form.csrf_token }}
-    <div class="container">
-      <div class="row">
-        {% for field in form %}
-          {% if field.type != 'SubmitField' and field.type != 'CSRFTokenField' %}
-            <div class="col-md-4 mb-3">
-              <div class="form-group">
-                {% if field.type == 'BooleanField' %}
-                  <div class="form-check">
-                    {{ field(class_="form-check-input") }}
-                    {{ field.label(class_="form-check-label") }}
-                  </div>
-                {% else %}
-                  {{ field.label }}
-                  {{ field(class_="form-control") }}
-                {% endif %}
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          {{ form.pere_name.label }}
+          {{ form.pere_name(class_="form-control") }}
+        </div>
+        <div class="form-group">
+          {{ form.maman_name.label }}
+          {{ form.maman_name(class_="form-control") }}
+        </div>
+        <div class="form-group">
+          {{ form.cin.label }}
+          {{ form.cin(class_="form-control") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.Accord_P_Education_parental(class_="form-check-input") }}
+          {{ form.Accord_P_Education_parental.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.Education_Non_Formelle(class_="form-check-input") }}
+          {{ form.Education_Non_Formelle.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.lutte_contre_Travail_des_enfants(class_="form-check-input") }}
+          {{ form.lutte_contre_Travail_des_enfants.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.Projet_Sabab_Mutasamih(class_="form-check-input") }}
+          {{ form.Projet_Sabab_Mutasamih.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.CIDEAL_Maroc(class_="form-check-input") }}
+          {{ form.CIDEAL_Maroc.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group">
+          {{ form.Attestation_scolaire.label }}
+          {{ form.Attestation_scolaire(class_="form-control-file") }}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group form-check">
+          {{ form.Photos(class_="form-check-input") }}
+          {{ form.Photos.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.photocopie_CIN_parents(class_="form-check-input") }}
+          {{ form.photocopie_CIN_parents.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.Acte_de_naissance(class_="form-check-input") }}
+          {{ form.Acte_de_naissance.label(class_="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+          {{ form.CIN_du_jeune(class_="form-check-input") }}
+          {{ form.CIN_du_jeune.label(class_="form-check-label") }}
+        </div>
+        <input type="hidden" name="child_id" value="{{ child_id }}">
       </div>
     </div>
     <div class="text-center">
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </div>
-
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
   </form>
-
-{% endblock %}
+</div>
+  {% endblock %}

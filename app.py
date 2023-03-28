@@ -11,7 +11,6 @@ from email_validator import validate_email, EmailNotValidError
 from flask_wtf.csrf import CSRFProtect
 import uuid
 from datetime import datetime
-import os
 from flask_bcrypt import Bcrypt, generate_password_hash
 from wtforms import DateField, SelectField, PasswordField
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
@@ -21,6 +20,13 @@ import sqlite3
 import plotly.graph_objs as go
 import plotly.offline as opy
 import plotly.express as px
+import os
+from azure.storage.blob import BlobServiceClient
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
+import uuid
+from flask_wtf.file import FileField
+from azure.storage.blob import BlobClient
 
 app = Flask(__name__)
 
@@ -33,6 +39,7 @@ app.config['SECRET_KEY'] = 'secretkey'
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
 
 login_manager = LoginManager(app)
 login_manager.init_app(app)
@@ -47,15 +54,15 @@ def load_user(id):
 
 class Family(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    pere_name = db.Column(db.String(100), nullable=False)
-    maman_name = db.Column(db.String(100), nullable=False)
+    pere_name = db.Column(db.String(100), nullable=True)
+    maman_name = db.Column(db.String(100), nullable=True)
     cin = db.Column(db.String(20), nullable=True)
     Accord_P_Education_parental = db.Column(db.Boolean, default=False, nullable=True)
     Education_Non_Formelle = db.Column(db.Boolean, default=False, nullable=True)
     lutte_contre_Travail_des_enfants = db.Column(db.Boolean, default=False, nullable=True)
     Projet_Sabab_Mutasamih = db.Column(db.Boolean, default=False, nullable=True)
     CIDEAL_Maroc = db.Column(db.Boolean, default=False, nullable=True)
-    Attestation_scolaire = db.Column(db.Boolean, default=False, nullable=True)
+    Attestation_scolaire = db.Column(db.String(100), nullable=True)
     Photos = db.Column(db.Boolean, default=False, nullable=True)
     photocopie_CIN_parents = db.Column(db.Boolean, default=False, nullable=True)
     Acte_de_naissance = db.Column(db.Boolean, default=False, nullable=True)
@@ -87,6 +94,14 @@ class Children(db.Model, UserMixin):
     Entry_date = db.Column(db.Date, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     family = db.relationship('Family', backref='associated_child', lazy=True, cascade="all, delete-orphan")
+
+
+
+
+
+
+
+
 
 user_roles = db.Table('user_roles',
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
@@ -293,12 +308,6 @@ def basic_role_required(func):
     return decorated_view
 
 
-#comment
-
-#with app.app_context():
-#    db.create_all()
-#    print('created')
-
 class AddChildForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     contact = StringField('Contact', validators=[DataRequired()])
@@ -313,7 +322,7 @@ class AddChildForm(FlaskForm):
     Fraterie = StringField('Number of siblings', validators=[DataRequired()])
     Problemes_sante = StringField('Health problems', validators=[DataRequired()])
     Niveau_scolaire = StringField('Education level', validators=[DataRequired()])
-    date_arret_etudes = DateField('Date stopped studying', validators=[DataRequired()])
+    date_arret_etudes = DateField('Date stopped studying')
     Experience_professionnelle = StringField('Work experience', validators=[DataRequired()])
     Demande = StringField('Job request', validators=[DataRequired()])
     Entry_date = DateField('Entry_date', validators=[DataRequired()])
@@ -323,11 +332,7 @@ class AddChildForm(FlaskForm):
     
     submit = SubmitField('Add Child')
 
-#class PositiveIntegerField(IntegerField):
-#    def pre_validate(self, form):
-#        if self.data is not None and self.data < 0:
-#            raise ValidationError('Age must be a positive integer')
-        
+       
 @app.route('/add_child', methods=['GET', 'POST'])
 @manager_role_required
 @login_required
@@ -443,7 +448,6 @@ def edit_child(id):
         
     return render_template('edit_child.html', form=form, child=child)
 
-
 @app.route('/delete_child/<int:id>', methods=['POST'])
 @manager_role_required
 @login_required
@@ -453,16 +457,32 @@ def delete_child(id):
         flash('Child not found.', 'danger')
         return redirect(url_for('view_children'))
 
+    # Delete files associated with the child from the blob storage
+    family = child.family[0]
+    for field_name, field in family.__dict__.items():
+        if field_name.endswith('_file_path') and field:
+            print(field) # add this line to print the value of field
+            blob_client = container_client.get_blob_client(field.split('/')[-1])
+            print(f"Deleting blob {field.split('/')[-1]}")
+            try:
+                blob_client.delete_blob()
+            except Exception as e:
+                print(e)
+
+    # Delete child's files from the blob storage
+    for field_name, field in child.__dict__.items():
+        if field_name.endswith('_file_path') and field:
+            blob_client = container_client.get_blob_client(field.split('/')[-1])
+            print(f"Deleting blob {field.split('/')[-1]}")
+            try:
+                blob_client.delete_blob()
+            except Exception as e:
+                print(e)
+
     db.session.delete(child)
     db.session.commit()
     flash('Child deleted successfully.', 'success')
     return redirect(url_for('view_children'))
-
-
-
-
-
-
 
 
 class RegisterFrom(FlaskForm):
@@ -534,9 +554,9 @@ def dashboard():
     age_counts = Children.query.with_entities(
         db.case(
             
-                (Children.age <= 6, '0-6'),
-                (Children.age <= 12, '7-12'),
-                (Children.age <= 18, '13-18'),
+                (Children.age <= 16, '0-16'),
+                (Children.age <= 12, '17-18'),
+                (Children.age > 18, '18+'),
                 else_='18+'
         ).label('age_group'),
         db.func.count()
@@ -667,19 +687,19 @@ def user_management():
 
 
 class FamilyForm(FlaskForm):
-    pere_name = StringField('Pere Name', validators=[DataRequired(), Length(min=2, max=100)])
-    maman_name = StringField('Maman Name', validators=[DataRequired(), Length(min=2, max=100)])
+    pere_name = StringField('Pere Name', validators=[Length(max=100)])
+    maman_name = StringField('Maman Name', validators=[ Length(max=100)])
     cin = StringField('CIN', validators=[Length(max=20)])
     Accord_P_Education_parental = BooleanField('Accord Parental pour l\'Education')
     Education_Non_Formelle = BooleanField('Education Non Formelle')
     lutte_contre_Travail_des_enfants = BooleanField('Lutte contre Travail des enfants')
     Projet_Sabab_Mutasamih = BooleanField('Projet Sabab Mutasamih')
     CIDEAL_Maroc = BooleanField('CIDEAL Maroc')
-    Attestation_scolaire = BooleanField('Attestation Scolaire')
-    Photos = BooleanField('Photos')
-    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents')
-    Acte_de_naissance = BooleanField('Acte de Naissance')
-    CIN_du_jeune = BooleanField('CIN du Jeune')
+    Attestation_scolaire = FileField('Attestation Scolaire')
+    Photos = BooleanField('Photos', default=False)
+    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents', default=False)
+    Acte_de_naissance = BooleanField('Acte de Naissance', default=False)
+    CIN_du_jeune = BooleanField('CIN du Jeune', default=False)
     submit = SubmitField('Save')
 
 
@@ -687,33 +707,67 @@ class FamilyForm(FlaskForm):
 def view_family(child_id):
     child = Children.query.get_or_404(child_id)
     family = Family.query.filter_by(children_id=child.id).first()
-    print("Family data:", family.__dict__)
     form = FamilyForm()
     return render_template('view_family.html', child=child, family=family, form=form)
 
+
+
+####
+os.environ['AZURE_CONNECTION_STRING'] = 'DefaultEndpointsProtocol=https;AccountName=dplake22;AccountKey=JKrAgmSV+CbRuYhYgu0a8gcLDLQr1gs0QJEcSKMswrun2hF90Xj1+XrjpH50yY4xDoSF1Z9F1yAf+AStDqk3Uw==;EndpointSuffix=core.windows.net'
+connection_string = os.environ['AZURE_CONNECTION_STRING']
+blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+account_name = 'dplake22'
+container_name = 'darnapp'
+container_client = blob_service_client.get_container_client(container_name)
+# Create a BlobClient object
+
+####
+
+
 @app.route('/add_family', methods=['GET', 'POST'])
+@manager_role_required
 @login_required
 def add_family():
     child_id = request.args.get('child_id')
     form = FamilyForm()
     if form.validate_on_submit():
-        print("Form data:", form.data)
         family = Family(pere_name=form.pere_name.data, maman_name=form.maman_name.data, cin=form.cin.data,
                         Accord_P_Education_parental=form.Accord_P_Education_parental.data,
                         Education_Non_Formelle=form.Education_Non_Formelle.data,
                         lutte_contre_Travail_des_enfants=form.lutte_contre_Travail_des_enfants.data,
                         Projet_Sabab_Mutasamih=form.Projet_Sabab_Mutasamih.data, CIDEAL_Maroc=form.CIDEAL_Maroc.data,
-                        Attestation_scolaire=form.Attestation_scolaire.data, Photos=form.Photos.data,
-                        photocopie_CIN_parents=form.photocopie_CIN_parents.data,
-                        Acte_de_naissance=form.Acte_de_naissance.data, CIN_du_jeune=form.CIN_du_jeune.data,
+                        Attestation_scolaire=None, Photos=None,
+                        photocopie_CIN_parents=None, Acte_de_naissance=None, CIN_du_jeune=None,
                         children_id=child_id)
+
+        # Handle file uploads and store file paths in Azure Blob Storage
+        for field_name, field in form.data.items():
+            if isinstance(field, FileStorage):
+                file = field
+                if file.filename != '':
+                    try:
+
+                        # Delete the old file if it exists
+                        if getattr(family, field_name):
+                            blob_client = container_client.get_blob_client(getattr(family, field_name).split('/')[-1])
+                            blob_client.delete_blob()
+                    except:
+                        pass
+
+                    # Upload the new file
+                    filename = secure_filename(file.filename)
+                    blob_client = container_client.get_blob_client(f"Attestation_Scolaire/{filename}")
+                    blob_client.upload_blob(file)
+                    setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/Attestation_Scolaire/{filename}")
+
+        # Save the changes to the database
         db.session.add(family)
         db.session.commit()
-        db.session.refresh(family)
-        flash('Your family information has been added!', 'success')
-        return redirect(url_for('view_children', child_id=child_id))
-    return render_template('add_family.html', title='Add Family Information', form=form)
 
+        flash('Your family information has been updated!', 'success')
+        return redirect(url_for('view_family', child_id=child_id))
+    
+    return render_template('add_family.html', form=form)
 
 @app.route('/edit_family/<int:child_id>', methods=['GET', 'POST'])
 @manager_role_required
@@ -729,30 +783,39 @@ def edit_family(child_id):
         flash('Family not found.', 'danger')
         return redirect(url_for('view_family', child_id=child_id))
 
-    form = FamilyForm(obj=family)
+    form = FamilyForm()
+
+    if request.method == 'GET':
+        form.process(obj=family)
 
     if form.validate_on_submit():
-        form.populate_obj(family)
+        # Handle file uploads and update file paths in Azure Blob Storage
+        for field_name, field in form.data.items():
+            if isinstance(field, FileStorage):
+                file = field
+                if file.filename != '':
+                    try:
+
+                        # Delete the old file if it exists
+                        if getattr(family, field_name):
+                            blob_client = container_client.get_blob_client(getattr(family, field_name).split('/')[-1])
+                            blob_client.delete_blob()
+                    except:
+                        pass
+
+                    # Upload the new file
+                    filename = secure_filename(file.filename)
+                    blob_client = container_client.get_blob_client(f"Attestation_Scolaire/{filename}")
+                    blob_client.upload_blob(file)
+                    setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/Attestation_Scolaire/{filename}")
+
+        # Save the changes to the database
         db.session.commit()
         flash('Family updated successfully.', 'success')
         return redirect(url_for('view_family', child_id=child_id))
-    else:
-        # populate form fields with current family data
-        form.pere_name.data = family.pere_name
-        form.maman_name.data = family.maman_name
-        form.cin.data = family.cin
-        form.Accord_P_Education_parental.data = family.Accord_P_Education_parental
-        form.Education_Non_Formelle.data = family.Education_Non_Formelle
-        form.lutte_contre_Travail_des_enfants.data = family.lutte_contre_Travail_des_enfants
-        form.Projet_Sabab_Mutasamih.data = family.Projet_Sabab_Mutasamih
-        form.CIDEAL_Maroc.data = family.CIDEAL_Maroc
-        form.Attestation_scolaire.data = family.Attestation_scolaire
-        form.Photos.data = family.Photos
-        form.photocopie_CIN_parents.data = family.photocopie_CIN_parents
-        form.Acte_de_naissance.data = family.Acte_de_naissance
-        form.CIN_du_jeune.data = family.CIN_du_jeune
 
     return render_template('edit_family.html', form=form, family=family, child_id=child_id)
+
 
 
 

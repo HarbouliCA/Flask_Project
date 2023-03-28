@@ -44,12 +44,17 @@
               <tr>
                   <th>CIDEAL Maroc</th>
                   <td>{{  family.CIDEAL_Maroc  }}</td>
-              </tr>
-              <tr>
-                <th>Attestation Scolaire</th>
-                <td>{{family.Attestation_scolaire }}</td>
-            </tr>
-            <tr>
+                  <tr>
+                    <th>Attestation Scolaire</th>
+                    <td>
+                        {% if family.Attestation_scolaire %}
+                            <a href="{{ family.Attestation_scolaire }}" download>Download Attestation Scolaire</a>
+                        {% else %}
+                            No file uploaded.
+                        {% endif %}
+                    </td>
+                </tr>
+                
                 <th>Photos</th>
                 <td>{{family.Photos }}</td>
             </tr>

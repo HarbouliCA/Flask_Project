@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block title %}Edit Family{% endblock %}
 
@@ -10,7 +10,7 @@
   </div>
 </div>
 
-<form method="POST" class="custom-form">
+<form method="POST" class="custom-form" enctype="multipart/form-data">
   {{ form.hidden_tag() }}
 
   <div class="form-group">
@@ -61,14 +61,14 @@
       {{ form.CIDEAL_Maroc(class_="form-check-input", checked=form.CIDEAL_Maroc.data) }}
       <label for="{{ form.CIDEAL_Maroc.id }}" class="form-check-label">{{ form.CIDEAL_Maroc.label }}</label>
     </div>
+    <div class="form-group">
+      <label for="{{ form.Attestation_scolaire.id }}" class="label-edit">{{ form.Attestation_scolaire.label }}</label>
+      <input type="file" name="{{ form.Attestation_scolaire.name }}" class="form-control-file">
+      {% if family.Attestation_scolaire %}
+          <a href="{{ family.Attestation_scolaire }}" target="_blank" rel="noopener noreferrer">Download Attestation Scolaire</a>
+      {% endif %}
+    </div>
     
-      </div>
-      <div class="form-group">
-        <div class="form-check form-check-inline">
-          {{ form.Attestation_scolaire(class_="form-check-input", checked=form.Attestation_scolaire.data) }}
-          <label for="{{ form.Attestation_scolaire.id }}" class="form-check-label">{{ form.Attestation_scolaire.label }}</label>
-        </div>
-      </div>
       <div class="form-group">
         <div class="form-check form-check-inline">
           {{ form.Photos(class_="form-check-input", checked=form.Photos.data) }}
@@ -94,6 +94,5 @@
         </div>
       </div>
     <button type="submit" class="btn btn-primary">Update Family</button>
-    
-    </form>
-    {% endblock %}
+  </form>
+  {% endblock %}
