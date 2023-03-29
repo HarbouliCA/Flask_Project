@@ -60,39 +60,51 @@
     <div class="form-check form-check-inline">
       {{ form.CIDEAL_Maroc(class_="form-check-input", checked=form.CIDEAL_Maroc.data) }}
       <label for="{{ form.CIDEAL_Maroc.id }}" class="form-check-label">{{ form.CIDEAL_Maroc.label }}</label>
-    </div>
-    <div class="form-group">
-      <label for="{{ form.Attestation_scolaire.id }}" class="label-edit">{{ form.Attestation_scolaire.label }}</label>
-      <input type="file" name="{{ form.Attestation_scolaire.name }}" class="form-control-file">
-      {% if family.Attestation_scolaire %}
-          <a href="{{ family.Attestation_scolaire }}" target="_blank" rel="noopener noreferrer">Download Attestation Scolaire</a>
-      {% endif %}
-    </div>
+      <div class="form-group">
+        <div class="custom-file">
+          {{ form.Attestation_scolaire(id="attestation_scolaire", class_="custom-file-input") }}
+          <label for="attestation_scolaire" class="custom-file-label">{{ form.Attestation_scolaire.label }}</label>
+        </div>
+        {% if family.Attestation_scolaire %}
+          <p>Current file: <a href="{{ family.Attestation_scolaire }}" target="_blank" rel="noopener noreferrer">{{ family.Attestation_scolaire.split("/")[-1] }}</a></p>
+        {% endif %}
+      </div>
     
       <div class="form-group">
-        <div class="form-check form-check-inline">
-          {{ form.Photos(class_="form-check-input", checked=form.Photos.data) }}
-          <label for="{{ form.Photos.id }}" class="form-check-label">{{ form.Photos.label }}</label>
+        <div class="custom-file">
+          {{ form.Photos(id="photos", class_="custom-file-input") }}
+          <label for="photos" class="custom-file-label">{{ form.Photos.label }}</label>
         </div>
+        {% if family.Photos %}
+          <p>Current file: <a href="{{ family.Photos }}" target="_blank" rel="noopener noreferrer">{{ family.Photos.split("/")[-1] }}</a></p>
+        {% endif %}
       </div>
+
       <div class="form-group">
-        <div class="form-check form-check-inline">
-          {{ form.photocopie_CIN_parents(class_="form-check-input", checked=form.photocopie_CIN_parents.data) }}
-          <label for="{{ form.photocopie_CIN_parents.id }}" class="form-check-label">{{ form.photocopie_CIN_parents.label }}</label>
+        <div class="custom-file">
+          {{ form.photocopie_CIN_parents(id="photocopie_CIN_parents", class_="custom-file-input") }}
+          <label for="photocopie_CIN_parents" class="custom-file-label">{{ form.photocopie_CIN_parents.label }}</label>
         </div>
+        {% if family.photocopie_CIN_parents %}
+          <p>Current file: <a href="{{ family.photocopie_CIN_parents }}" target="_blank" rel="noopener noreferrer">{{ family.photocopie_CIN_parents.split("/")[-1] }}</a></p>
+        {% endif %}
       </div>
+    
       <div class="form-group">
         <div class="form-check form-check-inline">
           {{ form.Acte_de_naissance(class_="form-check-input", checked=form.Acte_de_naissance.data) }}
           <label for="{{ form.Acte_de_naissance.id }}" class="form-check-label">{{ form.Acte_de_naissance.label }}</label>
         </div>
       </div>
+    
       <div class="form-group">
         <div class="form-check form-check-inline">
           {{ form.CIN_du_jeune(class_="form-check-input", checked=form.CIN_du_jeune.data) }}
           <label for="{{ form.CIN_du_jeune.id }}" class="form-check-label">{{ form.CIN_du_jeune.label }}</label>
         </div>
       </div>
-    <button type="submit" class="btn btn-primary">Update Family</button>
-  </form>
+    
+      <button type="submit" class="btn btn-primary">Update Family</button>
+    </form>
+  </div>
   {% endblock %}

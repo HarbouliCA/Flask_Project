@@ -66,7 +66,7 @@ class Family(db.Model, UserMixin):
     Projet_Sabab_Mutasamih = db.Column(db.Boolean, default=False, nullable=True)
     CIDEAL_Maroc = db.Column(db.Boolean, default=False, nullable=True)
     Attestation_scolaire = db.Column(db.String(100), nullable=True)
-    Photos = db.Column(db.Boolean, default=False, nullable=True)
+    Photos = db.Column(db.String(100), nullable=True)
     photocopie_CIN_parents = db.Column(db.Boolean, default=False, nullable=True)
     Acte_de_naissance = db.Column(db.Boolean, default=False, nullable=True)
     CIN_du_jeune = db.Column(db.Boolean, default=False, nullable=True)
@@ -693,10 +693,10 @@ class FamilyForm(FlaskForm):
     Projet_Sabab_Mutasamih = BooleanField('Projet Sabab Mutasamih')
     CIDEAL_Maroc = BooleanField('CIDEAL Maroc')
     Attestation_scolaire = FileField('Attestation Scolaire')
-    Photos = BooleanField('Photos', default=False)
-    photocopie_CIN_parents = BooleanField('Photocopie CIN des Parents', default=False)
-    Acte_de_naissance = BooleanField('Acte de Naissance', default=False)
-    CIN_du_jeune = BooleanField('CIN du Jeune', default=False)
+    Photos = FileField('Photos', default=False)
+    photocopie_CIN_parents = FileField('Photocopie CIN des Parents')
+    Acte_de_naissance = FileField('Acte de Naissance')
+    CIN_du_jeune = FileField('CIN du Jeune')
     submit = SubmitField('Save')
 
 
@@ -754,7 +754,7 @@ def add_family():
                     # Upload the new file
                     filename = secure_filename(file.filename)
                     blob_client = container_client.get_blob_client(f"Attestation_Scolaire/{filename}")
-                    blob_client.upload_blob(file)
+                    blob_client.upload_blob(file, overwrite=True)
                     setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/Attestation_Scolaire/{filename}")
 
         # Save the changes to the database
@@ -803,18 +803,26 @@ def edit_family(child_id):
                     # Upload the new file
                     filename = secure_filename(file.filename)
                     blob_client = container_client.get_blob_client(f"Attestation_Scolaire/{filename}")
-                    blob_client.upload_blob(file)
+                    blob_client.upload_blob(file, overwrite=True)
                     setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/Attestation_Scolaire/{filename}")
 
         # Save the changes to the database
+        family.pere_name = form.pere_name.data
+        family.maman_name = form.maman_name.data
+        family.cin = form.cin.data
+        family.Accord_P_Education_parental = form.Accord_P_Education_parental.data
+        family.Education_Non_Formelle = form.Education_Non_Formelle.data
+        family.lutte_contre_Travail_des_enfants = form.lutte_contre_Travail_des_enfants.data
+        family.Projet_Sabab_Mutasamih = form.Projet_Sabab_Mutasamih.data
+        family.CIDEAL_Maroc = form.CIDEAL_Maroc.data
+        family.photocopie_CIN_parents = form.photocopie_CIN_parents.data
+        family.Acte_de_naissance = form.Acte_de_naissance.data
+        family.CIN_du_jeune = form.CIN_du_jeune.data
         db.session.commit()
         flash('Family updated successfully.', 'success')
         return redirect(url_for('view_family', child_id=child_id))
 
     return render_template('edit_family.html', form=form, family=family, child_id=child_id)
-
-
-
 
 
 
