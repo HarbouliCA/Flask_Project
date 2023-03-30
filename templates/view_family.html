@@ -69,7 +69,7 @@
                 <tr>
                     <th>Photocopie CIN des Parents</th>
                     <td>
-                        {% if family.Photos %}
+                        {% if family.photocopie_CIN_parents %}
                             <a class="download_a" href="{{ family.photocopie_CIN_parents }}" download>Download photocopie CIN parents</a>
                         {% else %}
                             No file uploaded.
@@ -77,14 +77,30 @@
                     </td>
                 </tr>           
 
-            <tr>
-                <th>Acte de Naissance</th>
-                <td>{{  family.Acte_de_naissance  }}</td>
-            </tr>
-            <tr>
-                <th>CIN du Jeune</th>
-                <td>{{  family.CIN_du_jeune  }}</td>
-            </tr>
+
+
+                <tr>
+                    <th>Acte de Naissance</th>
+                    <td>
+                        {% if family.Acte_de_naissance %}
+                            <a class="download_a" href="{{ family.Acte_de_naissance }}" download>Download Acte de naissance</a>
+                        {% else %}
+                            No file uploaded.
+                        {% endif %}
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <th>CIN du Jeune</th>
+                    <td>
+                        {% if family.CIN_du_jeune %}
+                            <a class="download_a" href="{{ family.CIN_du_jeune }}" download>Download CIN du jeune</a>
+                        {% else %}
+                            No file uploaded.
+                        {% endif %}
+                    </td>
+                </tr>
             
         </table>
     </div>

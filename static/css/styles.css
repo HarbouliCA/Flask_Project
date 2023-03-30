@@ -289,11 +289,21 @@ table td {
   color: blue;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  transition: background-color 0.3s ease;
+
 
 }
 
 
 th.center{
   text-align: center;
+}
+
+.a_file_name{
+  color: blue
+}
+
+.custom-file-label{
+  font: 1.1em sans-serif;
+  font-style: oblique;
+  font-weight: bold;
 }

@@ -67,9 +67,9 @@ class Family(db.Model, UserMixin):
     CIDEAL_Maroc = db.Column(db.Boolean, default=False, nullable=True)
     Attestation_scolaire = db.Column(db.String(100), nullable=True)
     Photos = db.Column(db.String(100), nullable=True)
-    photocopie_CIN_parents = db.Column(db.Boolean, default=False, nullable=True)
-    Acte_de_naissance = db.Column(db.Boolean, default=False, nullable=True)
-    CIN_du_jeune = db.Column(db.Boolean, default=False, nullable=True)
+    photocopie_CIN_parents = db.Column(db.String(100), nullable=True)
+    Acte_de_naissance = db.Column(db.String(100), nullable=True)
+    CIN_du_jeune = db.Column(db.String(100), nullable=True)
     children_id = db.Column(db.Integer, db.ForeignKey('children.id'))
     child = db.relationship('Children', backref='parent_family')
   
@@ -766,6 +766,7 @@ def add_family():
     
     return render_template('add_family.html', form=form)
 
+
 @app.route('/edit_family/<int:child_id>', methods=['GET', 'POST'])
 @manager_role_required
 @login_required
@@ -784,43 +785,39 @@ def edit_family(child_id):
 
     if request.method == 'GET':
         form.process(obj=family)
-
     if form.validate_on_submit():
         # Handle file uploads and update file paths in Azure Blob Storage
-        for field_name, field in form.data.items():
-            if isinstance(field, FileStorage):
-                file = field
-                if file.filename != '':
-                    try:
+        file_fields = ['Attestation_scolaire', 'Photos', 'photocopie_CIN_parents', 'Acte_de_naissance', 'CIN_du_jeune']
+        for field_name in file_fields:
+            field = getattr(form, field_name)
+            file = field.data
+            if file and file.filename != '':
+                try:
+                    # Delete the old file if it exists
+                    if getattr(family, field_name):
+                        blob_client = container_client.get_blob_client(getattr(family, field_name).split('/')[-1])
+                        blob_client.delete_blob()
+                except:
+                    pass
 
-                        # Delete the old file if it exists
-                        if getattr(family, field_name):
-                            blob_client = container_client.get_blob_client(getattr(family, field_name).split('/')[-1])
-                            blob_client.delete_blob()
-                    except:
-                        pass
+                # Upload the new file
+                filename = secure_filename(file.filename)
+                blob_client = container_client.get_blob_client(f"{field_name}/{filename}")
+                blob_client.upload_blob(file, overwrite=True)
+                setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/{field_name}/{filename}")
 
-                    # Upload the new file
-                    filename = secure_filename(file.filename)
-                    blob_client = container_client.get_blob_client(f"Attestation_Scolaire/{filename}")
-                    blob_client.upload_blob(file, overwrite=True)
-                    setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/Attestation_Scolaire/{filename}")
+        # Save the changes to the database for other fields
+        fields_to_update = [
+            'pere_name', 'maman_name', 'cin', 'Accord_P_Education_parental', 'Education_Non_Formelle',
+            'lutte_contre_Travail_des_enfants', 'Projet_Sabab_Mutasamih', 'CIDEAL_Maroc'
+        ]
+        for field_name in fields_to_update:
+            setattr(family, field_name, getattr(form, field_name).data)
 
-        # Save the changes to the database
-        family.pere_name = form.pere_name.data
-        family.maman_name = form.maman_name.data
-        family.cin = form.cin.data
-        family.Accord_P_Education_parental = form.Accord_P_Education_parental.data
-        family.Education_Non_Formelle = form.Education_Non_Formelle.data
-        family.lutte_contre_Travail_des_enfants = form.lutte_contre_Travail_des_enfants.data
-        family.Projet_Sabab_Mutasamih = form.Projet_Sabab_Mutasamih.data
-        family.CIDEAL_Maroc = form.CIDEAL_Maroc.data
-        family.photocopie_CIN_parents = form.photocopie_CIN_parents.data
-        family.Acte_de_naissance = form.Acte_de_naissance.data
-        family.CIN_du_jeune = form.CIN_du_jeune.data
         db.session.commit()
         flash('Family updated successfully.', 'success')
         return redirect(url_for('view_family', child_id=child_id))
+
 
     return render_template('edit_family.html', form=form, family=family, child_id=child_id)
 
