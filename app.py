@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_security import Security, SQLAlchemyUserDatastore, RoleMixin
 from flask_wtf import FlaskForm
-from wtforms.validators import DataRequired, InputRequired, Length, ValidationError, NumberRange 
+from wtforms.validators import DataRequired, InputRequired, Length, ValidationError, NumberRange, Optional
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from email_validator import validate_email, EmailNotValidError
@@ -319,7 +319,7 @@ class AddChildForm(FlaskForm):
     Fraterie = StringField('Number of siblings', validators=[DataRequired()])
     Problemes_sante = StringField('Health problems', validators=[DataRequired()])
     Niveau_scolaire = StringField('Education level', validators=[DataRequired()])
-    date_arret_etudes = DateField('Date stopped studying')
+    date_arret_etudes = DateField('Date stopped studying', validators=[Optional()])
     Experience_professionnelle = StringField('Work experience', validators=[DataRequired()])
     Demande = StringField('Job request', validators=[DataRequired()])
     Entry_date = DateField('Entry_date', validators=[DataRequired()])
@@ -828,9 +828,9 @@ def edit_family(child_id):
 def download_children():
     search_query = request.args.get('q', '', type=str)
     job_query = request.args.get('job', '', type=str)
-    birthdate_query = request.args.get('birthdate', '', type=str)
-    entry_from_query = request.args.get('entry_from', '', type=str)
-    entry_to_query = request.args.get('entry_to', '', type=str)
+    birthdate_query = request.args.get('birthdate', '')
+    entry_from_query = request.args.get('entry_from', '')
+    entry_to_query = request.args.get('entry_to', '')
 
     # Initialize the query for the children table
     children = db.session.query(Children)

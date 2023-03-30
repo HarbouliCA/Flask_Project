@@ -61,6 +61,8 @@
       {{ form.CIDEAL_Maroc(class_="form-check-input", checked=form.CIDEAL_Maroc.data) }}
       <label for="{{ form.CIDEAL_Maroc.id }}" class="form-check-label">{{ form.CIDEAL_Maroc.label }}</label>
       <div class="form-group">
+        <div>
+        <div>
         <div class="custom-file">
           
           <label for="attestation_scolaire" class="custom-file-label">{{ form.Attestation_scolaire.label }}</label>
@@ -74,7 +76,7 @@
       <div class="form-group">
         <div class="custom-file">
           
-          <label for="photos" class="custom-file-label">{{ form.Photos.label }}</label>
+          <label for="photos" class="custom-file-label">{{ form.Photos.label }}</label><br>
           {{ form.Photos(id="photos", class_="custom-file-input") }}
         </div>
         {% if family.Photos %}
@@ -107,15 +109,14 @@
       <div class="form-group">
         <div class="custom-file">
           
-          <label for="CIN_du_jeune" class="custom-file-label">{{ form.CIN_du_jeune.label }}</label>
+          <label for="CIN_du_jeune" class="custom-file-label">{{ form.CIN_du_jeune.label }}</label><br>
           {{ form.CIN_du_jeune(id="CIN_du_jeune", class_="custom-file-input") }}
         </div>
         {% if family.Acte_de_naissance %}
           <p>Current file: <a class="a_file_name" href="{{ family.CIN_du_jeune }}" target="_blank" rel="noopener noreferrer">{{ family.CIN_du_jeune.split("/")[-1] }}</a></p>
         {% endif %}
       </div>
-    
-    
+      </div>    
       <button type="submit" class="btn btn-primary">Update Family</button>
     </form>
   </div>

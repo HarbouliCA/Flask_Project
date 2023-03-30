@@ -10,58 +10,58 @@
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          {{ form.pere_name.label }}
+          {{ form.pere_name.label (class_="label-form")}}
           {{ form.pere_name(class_="form-control") }}
         </div>
         <div class="form-group">
-          {{ form.maman_name.label }}
+          {{ form.maman_name.label(class_="label-form") }}
           {{ form.maman_name(class_="form-control") }}
         </div>
         <div class="form-group">
-          {{ form.cin.label }}
+          {{ form.cin.label (class_="label-form")}}
           {{ form.cin(class_="form-control") }}
         </div>
         <div class="form-group form-check">
           {{ form.Accord_P_Education_parental(class_="form-check-input") }}
-          {{ form.Accord_P_Education_parental.label(class_="form-check-label") }}
+          {{ form.Accord_P_Education_parental.label(class_="label-form") }}
         </div>
         <div class="form-group form-check">
           {{ form.Education_Non_Formelle(class_="form-check-input") }}
-          {{ form.Education_Non_Formelle.label(class_="form-check-label") }}
+          {{ form.Education_Non_Formelle.label(class_="label-form") }}
         </div>
         <div class="form-group form-check">
           {{ form.lutte_contre_Travail_des_enfants(class_="form-check-input") }}
-          {{ form.lutte_contre_Travail_des_enfants.label(class_="form-check-label") }}
+          {{ form.lutte_contre_Travail_des_enfants.label(class_="label-form") }}
         </div>
         <div class="form-group form-check">
           {{ form.Projet_Sabab_Mutasamih(class_="form-check-input") }}
-          {{ form.Projet_Sabab_Mutasamih.label(class_="form-check-label") }}
+          {{ form.Projet_Sabab_Mutasamih.label(class_="label-form") }}
         </div>
         <div class="form-group form-check">
           {{ form.CIDEAL_Maroc(class_="form-check-input") }}
-          {{ form.CIDEAL_Maroc.label(class_="form-check-label") }}
+          {{ form.CIDEAL_Maroc.label(class_="label-form") }}
         </div>
         <div class="form-group">
-          {{ form.Attestation_scolaire.label }}
+          {{ form.Attestation_scolaire.label (class_="label-form")}}<br>
           {{ form.Attestation_scolaire(class_="form-control-file") }}
         </div>
       </div>
       <div class="col-md-6">
-        <div class="form-group form-check">
-          {{ form.Photos.label }}
+        <div class="col-md-6">
+          {{ form.Photos.label (class_="label-form")}}<br>
           {{ form.Photos(class_="form-control-file") }}
         </div>
-        <div class="form-group form-check">
-          {{ form.photocopie_CIN_parents(class_="form-check-input") }}
-          {{ form.photocopie_CIN_parents.label(class_="form-check-label") }}
+        <div class="col-md-6">
+          {{ form.photocopie_CIN_parents.label  (class_="label-form")}}
+          {{ form.photocopie_CIN_parents(class_="form-control-file") }}
         </div>
-        <div class="form-group form-check">
-          {{ form.Acte_de_naissance(class_="form-check-input") }}
-          {{ form.Acte_de_naissance.label(class_="form-check-label") }}
+        <div class="col-md-6">
+          {{ form.Acte_de_naissance.label  (class_="label-form")}}
+          {{ form.Acte_de_naissance(class_="form-control-file") }}
         </div>
-        <div class="form-group form-check">
-          {{ form.CIN_du_jeune(class_="form-check-input") }}
-          {{ form.CIN_du_jeune.label(class_="form-check-label") }}
+        <div class="col-md-6">
+          {{ form.CIN_du_jeune.label  (class_="label-form")}}
+          {{ form.CIN_du_jeune(class_="form-control-file") }}
         </div>
         <input type="hidden" name="child_id" value="{{ child_id }}">
       </div>

@@ -74,7 +74,7 @@
         <th scope="col" class="center">Work insertion</th>
         <th scope="col" class="center">Self-employment</th>
         <th scope="col" class="center">Entry Date</th>
-        <th scope="col" class="center">More</th>
+        <th scope="col" class="center">Family</th>
         <th scope="col" class="center">Edit</th>
         <th scope="col" class="center">Delete</th>
       </tr>
@@ -99,12 +99,12 @@
           <textarea class="form-control" rows="1" style="resize: both;">{{ child.Fonction_pere }}</textarea>
         </td>
         <td>{{ child.Fonction_mere }}</td>
-        <td>{{ child.Fraterie }}</td>
+        <td><textarea class="form-control" rows="1" style="resize: both;">{{ child.Fraterie }}</textarea></td>
         <td>
           {{ child.Problemes_sante }}
         </td>
         <td>{{ child.Niveau_scolaire }}</td>
-        <td class="wider-column">{{ child.date_arret_etudes.strftime('%Y-%m-%d') }}</td>
+        <td class="wider-column">{{ child.date_arret_etudes.strftime('%Y-%m-%d') if child.date_arret_etudes is not none else '' }}</td>
         <td>
           <textarea class="form-control" rows="1" style="resize: both;">{{ child.Experience_professionnelle }}</textarea>
           </td>
@@ -115,7 +115,7 @@
         <td class="wider-column">{{ child.Entry_date.strftime('%Y-%m-%d') }}</td>
         
         <td>
-          <a href="{{ url_for('view_family', child_id=child.id) }}" class="btn btn-info btn-sm btn-padding">More</a></td>
+          <a href="{{ url_for('view_family', child_id=child.id) }}" class="btn btn-info btn-sm btn-padding">View</a></td>
           <td>
           <a href="{{ url_for('edit_child', id=child.id) }}" class="btn btn-warning btn-sm px-2">Edit</a></td>
           <td>
