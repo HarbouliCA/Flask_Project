@@ -1,4 +1,4 @@
-from flask import current_app, abort
+from flask import current_app, abort, Response
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
@@ -27,8 +27,8 @@ from werkzeug.utils import secure_filename
 import uuid
 from flask_wtf.file import FileField
 from azure.storage.blob import BlobClient
-
-
+import csv
+import io
 app = Flask(__name__)
 
 # Specify the absolute path to the database file
@@ -371,8 +371,8 @@ def add_child():
 @app.route('/view_children')
 @login_required
 def view_children():
-    search_query = request.args.get('q', '')
-    job_query = request.args.get('job', '')
+    search_query = request.args.get('q', '', type=str)
+    job_query = request.args.get('job', '', type=str)
     birthdate_query = request.args.get('birthdate', '')
     entry_from_query = request.args.get('entry_from', '')
     entry_to_query = request.args.get('entry_to', '')
@@ -820,6 +820,60 @@ def edit_family(child_id):
 
 
     return render_template('edit_family.html', form=form, family=family, child_id=child_id)
+
+
+
+@app.route('/download_children', methods=['GET'])
+@login_required
+def download_children():
+    search_query = request.args.get('q', '', type=str)
+    job_query = request.args.get('job', '', type=str)
+    birthdate_query = request.args.get('birthdate', '', type=str)
+    entry_from_query = request.args.get('entry_from', '', type=str)
+    entry_to_query = request.args.get('entry_to', '', type=str)
+
+    # Initialize the query for the children table
+    children = db.session.query(Children)
+
+    if search_query:
+        children = children.filter(Children.name.ilike(f'%{search_query}%'))
+
+    if job_query:
+        children = children.filter(Children.Demande.ilike(f'%{job_query}%'))
+
+    if birthdate_query:
+        birthdate_query = datetime.strptime(birthdate_query, '%Y-%m-%d').date()
+        children = children.filter(Children.Date_naissance == birthdate_query)
+
+    if entry_from_query and entry_to_query:
+        entry_from_query = datetime.strptime(entry_from_query, '%Y-%m-%d').date()
+        entry_to_query = datetime.strptime(entry_to_query, '%Y-%m-%d').date()
+        children = children.filter(Children.Entry_date.between(entry_from_query, entry_to_query))
+
+    children = children.all()
+
+    def generate():
+        data = io.StringIO()
+        writer = csv.writer(data)
+
+        # Write the header
+        writer.writerow(['Name', 'Contact', 'Sex', 'Birthdate', 'Age', 'Quartier', 'Adresse', 'Family situation', 'Father\'s profession', 'Mother\'s profession', 'Number of siblings', 'Health problems', 'Education level', 'Date stopped studying', 'Work experience', 'Job request', 'School insertion', 'Work insertion', 'Self-employment', 'Entry Date'])
+        yield data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+
+        # Write the data
+        for child in children:
+            writer.writerow([child.name, child.contact, child.sex, child.Date_naissance, child.age, child.Quartier, child.Adresse, child.situation_familliale, child.Fonction_pere, child.Fonction_mere, child.Fraterie, child.Problemes_sante, child.Niveau_scolaire, child.date_arret_etudes, child.Experience_professionnelle, child.Demande, child.Insertion_scolaire, child.Insertion_salariale, child.Auto_emploi, child.Entry_date])
+            yield data.getvalue()
+            data.seek(0)
+            data.truncate(0)
+
+    return Response(generate(), mimetype='text/csv', headers={'Content-Disposition': 'attachment; filename=children.csv'})
+
+
+
+
 
 
 

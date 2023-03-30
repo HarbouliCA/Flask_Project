@@ -27,23 +27,23 @@
               </tr>
               <tr>
                   <th>Accord Parental pour l'Education</th>
-                  <td>{{ family.Accord_P_Education_parental  }}</td>
+                  <td>{{ "Yes" if family.Accord_P_Education_parental else "No" }}</td>
               </tr>
               <tr>
                   <th>Education Non Formelle</th>
-                  <td>{{ family.Education_Non_Formelle  }}</td>
+                  <td>{{ "Yes" if family.Education_Non_Formelle  else "No"}}</td>
               </tr>
               <tr>
                   <th>Lutte contre Travail des enfants</th>
-                  <td>{{ family.lutte_contre_Travail_des_enfants  }}</td>
+                  <td>{{ "Yes" if family.lutte_contre_Travail_des_enfants  else "No"}}</td>
               </tr>
               <tr>
                   <th>Projet Sabab Mutasamih</th>
-                  <td>{{ family.Projet_Sabab_Mutasamih  }}</td>
+                  <td>{{ "Yes" if family.Projet_Sabab_Mutasamih else "No"  }}</td>
               </tr>
               <tr>
                   <th>CIDEAL Maroc</th>
-                  <td>{{  family.CIDEAL_Maroc  }}</td>
+                  <td>{{  "Yes" if family.CIDEAL_Maroc else "No"  }}</td>
                   <tr>
                     <th>Attestation Scolaire</th>
                     <td>

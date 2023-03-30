@@ -9,6 +9,9 @@
       <a href="{{ url_for('dashboard') }}" class="nav-item">Back</a>
       <a href="{{ url_for('view_children') }}" class="nav-item">Refresh</a>
       <a href="{{url_for('add_child')}}" class="nav-item">Add Child</a>
+      <a href="{{ url_for('download_children', q=search_query, job=job_query, birthdate=birthdate_query, entry_from=entry_from_query, entry_to=entry_to_query) }}" class="nav-item">Download</a>
+
+
     </div>
   </div>
 
@@ -23,7 +26,7 @@
     <div class="col-md-2">
       <form class="d-flex" method="GET" action="{{ url_for('view_children') }}">
         <label class="me-2" for="name_search">Job:</label>
-        <input class="form-control me-2" type="text" name="job" value="{{ search_query }}" placeholder="Search by job...">
+        <input class="form-control me-2" type="text" name="job" value="{{ job_query }}" placeholder="Search by job...">
         <button class="btn btn-outline-primary" type="submit">Search</button>
       </form>
     </div>
