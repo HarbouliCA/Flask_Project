@@ -1,7 +1,7 @@
 from flask import current_app, abort, Response
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin, AnonymousUserMixin
 from flask_security import Security, SQLAlchemyUserDatastore, RoleMixin
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, InputRequired, Length, ValidationError, NumberRange, Optional
@@ -12,7 +12,7 @@ from flask_wtf.csrf import CSRFProtect
 import uuid
 from datetime import datetime
 from flask_bcrypt import Bcrypt, generate_password_hash
-from wtforms import DateField, SelectField, PasswordField
+from wtforms import DateField, SelectField, PasswordField, SelectMultipleField, SelectFieldBase
 from wtforms.fields import StringField, SubmitField, BooleanField, IntegerField
 from flask_bootstrap import Bootstrap
 from functools import wraps
@@ -29,6 +29,7 @@ from flask_wtf.file import FileField
 from azure.storage.blob import BlobClient
 import csv
 import io
+
 app = Flask(__name__)
 
 # Specify the absolute path to the database file
@@ -122,6 +123,8 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary= user_roles, lazy='joined',
                              backref=db.backref('users', lazy=True))
 
+    def has_roles(self, *roles):
+        return any(role in [r.name for r in self.roles] for role in roles)
 
 
     def get_id(self):
@@ -134,6 +137,9 @@ class User(db.Model, UserMixin):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
 
 
+class Role(db.Model, RoleMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
 
 def create_roles():
     with app.app_context():
@@ -167,19 +173,25 @@ def create_roles():
             admin_user.roles.append(manager_role)
         db.session.commit()
 
-
 # Register the function to run after the application context is pushed
 app.before_first_request(create_roles)
+
 
 def role_required(*roles):
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
+            if isinstance(current_user, AnonymousUserMixin):
+                # user is not logged in, return 401 response
+                abort(401)
+
             if not current_user.has_roles(*roles):
                 abort(403)  # HTTP status code for "Forbidden"
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper
+
+
 
 # Define a decorator for the admin role
 def admin_role_required(func):
@@ -216,61 +228,26 @@ def basic_role_required(func):
 
 #comment
 
-class Role(db.Model, RoleMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-
-
-
-def create_roles():
-    with app.app_context():
-        admin_role = Role(name='admin')
-        # create some roles
-        admin_role = Role.query.filter_by(name='admin').first()
-        if not admin_role:
-            admin_role = Role(name='admin')
-            db.session.add(admin_role)
-
-        manager_role = Role.query.filter_by(name='manager').first()
-        if not manager_role:
-            manager_role = Role(name='manager')
-            db.session.add(manager_role)
-
-        basic_role = Role.query.filter_by(name='basic').first()
-        if not basic_role:
-            basic_role = Role(name='basic')
-            db.session.add(basic_role)
-
-        # create a default admin user
-        admin_user = User.query.filter_by(username='admin').first()
-        if not admin_user:
-            admin_user = User(username='admin', password=bcrypt.generate_password_hash('password').decode('utf-8'))
-            db.session.add(admin_user)
-
-        # add roles to admin user
-        if admin_role not in admin_user.roles:
-            admin_user.roles.append(admin_role)
-        if manager_role not in admin_user.roles:
-            admin_user.roles.append(manager_role)
-        db.session.commit()
-
 
 # Register the function to run after the application context is pushed
 app.before_first_request(create_roles)
 
 
-from functools import wraps
-from flask import abort
-
 def role_required(*roles):
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
+            if isinstance(current_user, AnonymousUserMixin):
+                # user is not logged in, return 401 response
+                abort(401)
+
             if not current_user.has_roles(*roles):
                 abort(403)  # HTTP status code for "Forbidden"
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper
+
+
 
 # Define a decorator for the admin role
 def admin_role_required(func):
@@ -307,7 +284,7 @@ def basic_role_required(func):
 
 class AddChildForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    contact = StringField('Contact', validators=[DataRequired()])
+    contact = StringField('Contact', validators=[Optional()])
     sex = SelectField('Gender', choices=[('male', 'Male'), ('female', 'Female')], validators=[DataRequired()])
     Date_naissance = DateField('Birthdate', validators=[DataRequired()])
     age = IntegerField('Age', validators=[DataRequired(), NumberRange(min=0)])
@@ -320,7 +297,7 @@ class AddChildForm(FlaskForm):
     Problemes_sante = StringField('Health problems', validators=[DataRequired()])
     Niveau_scolaire = StringField('Education level', validators=[DataRequired()])
     date_arret_etudes = DateField('Date stopped studying', validators=[Optional()])
-    Experience_professionnelle = StringField('Work experience', validators=[DataRequired()])
+    Experience_professionnelle = StringField('Work experience', validators=[Optional()])
     Demande = StringField('Job request', validators=[DataRequired()])
     Entry_date = DateField('Entry_date', validators=[DataRequired()])
     Insertion_scolaire = BooleanField('School insertion')
@@ -331,7 +308,7 @@ class AddChildForm(FlaskForm):
 
        
 @app.route('/add_child', methods=['GET', 'POST'])
-@manager_role_required
+@role_required('admin', 'manager')
 @login_required
 def add_child():
     form = AddChildForm()
@@ -405,7 +382,7 @@ def view_children():
 
 
 @app.route('/edit_child/<int:id>', methods=['GET', 'POST'])
-@manager_role_required
+@role_required('admin', 'manager')
 @login_required
 def edit_child(id):
     child = Children.query.get(id)
@@ -446,7 +423,7 @@ def edit_child(id):
     return render_template('edit_child.html', form=form, child=child)
 
 @app.route('/delete_child/<int:id>', methods=['POST'])
-@manager_role_required
+@role_required('admin', 'manager')
 @login_required
 def delete_child(id):
     child = Children.query.get(id)
@@ -491,6 +468,12 @@ class RegisterFrom(FlaskForm):
     
     submit = SubmitField("Register")
 
+    # new field for role selection
+    roles = SelectMultipleField('Roles', choices=[], coerce=int)
+
+    def __init__(self, *args, **kwargs):
+        super(RegisterFrom, self).__init__(*args, **kwargs)
+        self.roles.choices = [(role.id, role.name) for role in Role.query.order_by(Role.name).all()]
 
     def validate_username(self, username):
         existing_user_name = User.query.filter_by(
@@ -631,44 +614,70 @@ def logout():
 
 
 
-@app.route('/register', methods = ['GET', 'POST'])
-@admin_role_required
+@app.route('/register', methods=['GET', 'POST'])
+@role_required('admin')
 def register():
     form = RegisterFrom()
-
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        hashed_password = hash_password(form.password.data)
         new_user = User(username=form.username.data, password=hashed_password)
+
+        # Assign selected roles to the new user
+        selected_role_ids = form.roles.data
+        selected_roles = Role.query.filter(Role.id.in_(selected_role_ids)).all()
+        new_user.roles.extend(selected_roles)
+
         db.session.add(new_user)
         db.session.commit()
-        flash('Your account has been created', 'success')
+        flash('Congratulations, you are now a registered user!', 'success')
         return redirect(url_for('login'))
-    else:
-        return render_template('register.html', form = form)
+    return render_template('register.html', title='Register', form=form)
+
 
 
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+    roles = SelectField('Role', coerce=int)
     submit = SubmitField('Save Changes')
 
+    def __init__(self, *args, **kwargs):
+        super(EditUserForm, self).__init__(*args, **kwargs)
+        self.roles.choices = [(role.id, role.name) for role in Role.query.order_by(Role.name).all()]
+
+
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@role_required('admin')
 def edit_user(user_id):
     user = User.query.get(user_id)
     form = EditUserForm(obj=user)
+
+    # Populate roles field with available roles
+    roles = [(role.id, role.name) for role in Role.query.all()]
+    form.roles.choices = roles  # Change this line
+
     if form.validate_on_submit():
-        form.populate_obj(user)
+        # Get the selected role object
+        selected_role = Role.query.get(form.roles.data)  # Change this line
+        
+        # Update the user object
+        user.username = form.username.data
         user.set_password(form.password.data)
+        user.roles = [selected_role]  # Assign the selected role object to roles
+        
         db.session.commit()
         flash('User updated successfully.')
         return redirect('/user_management')
     return render_template('edit_user.html', form=form)
+
+
 
 @app.template_filter('hide_password')
 def hide_password(password):
     return '*' * len(password)
 
 @app.route('/delete_user/<int:user_id>')
+@role_required('admin')
 def delete_user(user_id):
     user = User.query.get(user_id)
     db.session.delete(user)
@@ -677,6 +686,7 @@ def delete_user(user_id):
     return redirect('/user_management')
 
 @app.route('/user_management')
+@role_required('admin')
 def user_management():
     users = User.query.all()
     return render_template('user_management.html', users=users)
@@ -690,7 +700,7 @@ class FamilyForm(FlaskForm):
     Accord_P_Education_parental = BooleanField('Accord Parental pour l\'Education')
     Education_Non_Formelle = BooleanField('Education Non Formelle')
     lutte_contre_Travail_des_enfants = BooleanField('Lutte contre Travail des enfants')
-    Projet_Sabab_Mutasamih = BooleanField('Projet Sabab Mutasamih')
+    Projet_Sabab_Mutasamih = BooleanField('Projet Shabab Mutasamih')
     CIDEAL_Maroc = BooleanField('CIDEAL Maroc')
     Attestation_scolaire = FileField('Attestation Scolaire')
     Photos = FileField('Photos', default=False)
@@ -701,6 +711,7 @@ class FamilyForm(FlaskForm):
 
 
 @app.route('/view_family/<int:child_id>')
+@login_required
 def view_family(child_id):
     child = Children.query.get_or_404(child_id)
     family = Family.query.filter_by(children_id=child.id).first()
@@ -722,7 +733,7 @@ container_client = blob_service_client.get_container_client(container_name)
 
 
 @app.route('/add_family', methods=['GET', 'POST'])
-@manager_role_required
+@role_required('admin', 'manager')
 @login_required
 def add_family():
     child_id = request.args.get('child_id')
@@ -753,9 +764,9 @@ def add_family():
 
                     # Upload the new file
                     filename = secure_filename(file.filename)
-                    blob_client = container_client.get_blob_client(f"Attestation_Scolaire/{filename}")
+                    blob_client = container_client.get_blob_client(f"{field}/{filename}")
                     blob_client.upload_blob(file, overwrite=True)
-                    setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/Attestation_Scolaire/{filename}")
+                    setattr(family, field_name, f"https://{account_name}.blob.core.windows.net/{container_name}/{field}/{filename}")
 
         # Save the changes to the database
         db.session.add(family)
@@ -768,7 +779,7 @@ def add_family():
 
 
 @app.route('/edit_family/<int:child_id>', methods=['GET', 'POST'])
-@manager_role_required
+@role_required('admin', 'manager')
 @login_required
 def edit_family(child_id):
     child = Children.query.get(child_id)
@@ -870,8 +881,6 @@ def download_children():
             data.truncate(0)
 
     return Response(generate(), mimetype='text/csv', headers={'Content-Disposition': 'attachment; filename=children.csv'})
-
-
 
 
 
