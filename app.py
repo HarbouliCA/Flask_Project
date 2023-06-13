@@ -721,7 +721,7 @@ def view_family(child_id):
 
 
 ####
-os.environ['AZURE_CONNECTION_STRING'] = 'DefaultEndpointsProtocol=https;AccountName=dplake22;AccountKey=JKrAgmSV+CbRuYhYgu0a8gcLDLQr1gs0QJEcSKMswrun2hF90Xj1+XrjpH50yY4xDoSF1Z9F1yAf+AStDqk3Uw==;EndpointSuffix=core.windows.net'
+os.environ['AZURE_CONNECTION_STRING'] = 'INPUT CONNECTION STRING'
 connection_string = os.environ['AZURE_CONNECTION_STRING']
 blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 account_name = 'dplake22'
